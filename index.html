@@ -1,0 +1,1095 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0066cc">
+    <title>Reproductor de Podcast - Tienda Inteligente</title>
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --secondary-color: #e6f0ff;
+            --text-color: #333;
+            --background-color: #f0f5ff;
+            --progress-color: #3498db;
+            --wave-color-1: rgba(0, 102, 204, 0.8);
+            --wave-color-2: rgba(52, 152, 219, 0.5);
+        }
+        
+        body, html {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 18px 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .player-container {
+            padding: 25px;
+        }
+        
+        .player-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .podcast-image {
+            width: 70px;
+            height: 70px;
+            background-color: var(--secondary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: var(--primary-color);
+            font-size: 24px;
+            box-shadow: 0 3px 10px rgba(0, 102, 204, 0.2);
+            transition: transform 0.2s;
+        }
+        
+        .podcast-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .podcast-details {
+            flex-grow: 1;
+        }
+        
+        .podcast-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        
+        .podcast-date {
+            color: #777;
+            font-size: 0.9rem;
+        }
+        
+        .player-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+     
+       /* Visualizador de ondas */
+            .wave-container {
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 15px 0;
+                padding: 0;
+                gap: 3px;
+            }
+
+            .wave-bar {
+                width: 3px;
+                background-color: #000;
+                border-radius: 3px;
+                margin: 0;
+                height: 5px;
+                transition: height 0.2s ease;
+            }
+        .progress-container {
+            background-color: #eee;
+            border-radius: 5px;
+            height: 6px;
+            position: relative;
+            cursor: pointer;
+            transition: height 0.2s;
+        }
+        
+        .progress-container:hover {
+            height: 8px;
+        }
+        
+        .progress-bar {
+            background-color: var(--progress-color);
+            height: 100%;
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+        
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .control-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .volume-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .volume-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--primary-color);
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        
+        .volume-button:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+        
+        .volume-slider {
+            -webkit-appearance: none;
+            width: 100px;
+            height: 4px;
+            border-radius: 2px;
+            background: #ddd;
+            outline: none;
+            transition: all 0.2s;
+        }
+        
+        .volume-slider:hover {
+            height: 5px;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        
+        .play-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0, 102, 204, 0.3);
+        }
+        
+        .play-button:hover {
+            background-color: #0055aa;
+            transform: scale(1.08);
+        }
+        
+        .play-button:active {
+            transform: scale(0.95);
+        }
+        
+        .archive-section {
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        
+        .archive-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+        
+        .archive-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .archive-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+        
+        .archive-item.not-available {
+            color: #999;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+        
+        .archive-item:hover {
+            background-color: var(--secondary-color);
+            transform: translateX(5px);
+        }
+        
+        .archive-item-icon {
+            margin-right: 15px;
+            color: var(--primary-color);
+        }
+        
+        .archive-item-date {
+            font-weight: 500;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                width: 95%;
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .player-info {
+                flex-direction: row;
+                align-items: center;
+            }
+            
+            .podcast-image {
+                width: 60px;
+                height: 60px;
+                margin-right: 12px;
+            }
+            
+            .play-button {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .wave-container {
+                height: 50px;
+            }
+            
+            .player-container {
+                padding: 15px;
+            }
+        }
+    </style>
+
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            Tienda Inteligente - Reporte Semanal
+        </div>
+        <div class="player-container">
+            <div class="player-info">
+                <div class="podcast-image">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                </div>
+                <div class="podcast-details">
+                    <div class="podcast-title">Resumen del Reporte Semanal de Tienda Inteligente</div>
+                    <div class="podcast-date" id="podcast-date">Cargando...</div>
+                    <div class="error-message" id="error-message"></div>
+                </div>
+            </div>
+            
+            <!-- Visualizador de ondas -->
+            <div class="wave-container" id="wave-container">
+                <!-- Se generará dinámicamente mediante JavaScript -->
+            </div>
+            
+            <div class="player-controls">
+                <div class="progress-container" id="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="time-display">
+                    <span id="current-time">00:00</span>
+                    <span id="duration">00:00</span>
+                </div>
+                <div class="control-buttons">
+                    <div></div>
+                    <button class="play-button" id="play-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="play-icon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="pause-icon" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                    </button>
+                    <div></div>
+                </div>
+                
+                <div class="volume-controls">
+                    <button class="volume-button" id="mute-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="volume-icon"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07" id="volume-low"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14" id="volume-high"></path></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="mute-icon" style="display: none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                    </button>
+                    <input type="range" min="0" max="1" step="0.01" value="1" class="volume-slider" id="volume-slider">
+                </div>
+            </div>
+            
+            <div class="archive-section">
+                <div class="archive-title">Resúmenes anteriores</div>
+                <ul class="archive-list" id="archive-list">
+                    <li class="archive-item">Buscando resúmenes disponibles...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const playButton = document.getElementById('play-button');
+            const playIcon = document.getElementById('play-icon');
+            const pauseIcon = document.getElementById('pause-icon');
+            const progressBar = document.getElementById('progress-bar');
+            const progressContainer = document.getElementById('progress-container');
+            const currentTimeDisplay = document.getElementById('current-time');
+            const durationDisplay = document.getElementById('duration');
+            const podcastDateDisplay = document.getElementById('podcast-date');
+            const archiveList = document.getElementById('archive-list');
+            const muteButton = document.getElementById('mute-button');
+            const volumeIcon = document.getElementById('volume-icon');
+            const muteIcon = document.getElementById('mute-icon');
+            const volumeSlider = document.getElementById('volume-slider');
+            const volumeLow = document.getElementById('volume-low');
+            const volumeHigh = document.getElementById('volume-high');
+            const errorMessage = document.getElementById('error-message');
+            const waveContainer = document.getElementById('wave-container');
+            
+            const audio = new Audio();
+            let isPlaying = false;
+            let isMuted = false;
+            let currentPodcast = '';
+            let previousVolume = 1;
+            let audioContext;
+            let analyser;
+            let dataArray;
+            let waveBars = [];
+            let animationId;
+            
+          // Crear visualizador de ondas
+            function createWaveVisualizer() {
+                // Crear barras para el visualizador (más barras para un efecto como Spotify)
+                for (let i = 0; i < 50; i++) {
+                    const bar = document.createElement('div');
+                    bar.className = 'wave-bar';
+                    waveContainer.appendChild(bar);
+                    waveBars.push(bar);
+                }
+                
+                // Establecer altura variable para el estado estático
+                
+            }
+            
+              // Patrón estático para cuando no hay reproducción
+           // Patrón estático para cuando no hay reproducción
+            function setStaticWavePattern() {
+                const centerIndex = Math.floor(waveBars.length / 2);
+                
+                // Crear un patrón de onda sinusoidal como en la imagen
+                waveBars.forEach((bar, index) => {
+                    // Calcular posición relativa (-1 a 1)
+                    const position = (index - centerIndex) / centerIndex;
+                    
+                    // Crear un patrón de onda con múltiples frecuencias
+                    const wave1 = Math.sin(position * Math.PI * 2);
+                    const wave2 = Math.sin(position * Math.PI * 4) * 0.5;
+                    const wave3 = Math.sin(position * Math.PI * 1) * 0.8;
+                    
+                    // Combinar las ondas
+                    const combinedWave = (wave1 + wave2 + wave3) / 2.3;
+                    
+                    // Convertir a altura (entre 5px y 45px)
+                    const height = 5 + ((combinedWave + 1) / 2) * 40;
+                    
+                    // Aplicar altura
+                    bar.style.height = `${Math.abs(height)}px`;
+    });
+}
+            
+            // Inicializar el analizador de audio
+            function setupAudioAnalyser() {
+                try {
+                    // Crear contexto de audio si aún no existe
+                    if (!audioContext) {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const source = audioContext.createMediaElementSource(audio);
+                        analyser = audioContext.createAnalyser();
+                        
+                        // Configurar análisis de frecuencia
+                        analyser.fftSize = 128;
+                        const bufferLength = analyser.frequencyBinCount;
+                        dataArray = new Uint8Array(bufferLength);
+                        
+                        // Conectar el flujo de audio
+                        source.connect(analyser);
+                        analyser.connect(audioContext.destination);
+                    }
+                } catch (error) {
+                    console.error('Error al configurar el analizador de audio:', error);
+                }
+            }
+            
+             // Actualizar el visualizador de ondas durante la reproducción
+           // Actualizar el visualizador de ondas durante la reproducción
+            function updateWaveVisualizer() {
+                if (!analyser || !isPlaying) return;
+                
+                analyser.getByteFrequencyData(dataArray);
+                
+                // Mapear los datos de frecuencia a las barras
+                const step = Math.floor(dataArray.length / waveBars.length);
+                
+                for (let i = 0; i < waveBars.length; i++) {
+                    const dataIndex = i * step;
+                    // Convertir el valor de frecuencia a una altura de barra
+                    const value = dataArray[dataIndex] || 0;
+                    // Altura mínima de 5px, máxima de 50px para que se vea como la imagen
+                    const height = 5 + (value / 255) * 45;
+                    
+                    // Todos en negro como en la imagen
+                    waveBars[i].style.backgroundColor = "#000";
+                    waveBars[i].style.height = `${height}px`;
+                }
+                
+                
+            }
+            
+            // Función para detener la animación del visualizador
+            function stopWaveVisualizer() {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+               
+            }
+
+
+            // Inicializar WaveSurfer
+                let wavesurfer;
+
+               // Inicializar visualizador con Canvas
+                    function initAudioVisualizer() {
+                        // Limpiar contenedor primero
+                        const waveContainer = document.getElementById('wave-container');
+                        waveContainer.innerHTML = '';
+                        
+                        // Crear elemento canvas
+                        const canvas = document.createElement('canvas');
+                        canvas.width = waveContainer.clientWidth;
+                        canvas.height = 60;
+                        canvas.style.display = 'block';
+                        waveContainer.appendChild(canvas);
+                        
+                        const canvasCtx = canvas.getContext('2d');
+                        
+                        // Configurar el contexto de audio si no existe
+                        if (!audioContext) {
+                            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                            const source = audioContext.createMediaElementSource(audio);
+                            analyser = audioContext.createAnalyser();
+                            
+                            // Configurar el analizador para datos detallados
+                            analyser.fftSize = 256;
+                            dataArray = new Uint8Array(analyser.frequencyBinCount);
+                            
+                            // Conectar el flujo de audio
+                            source.connect(analyser);
+                            analyser.connect(audioContext.destination);
+                        }
+                        
+                        // Crear un patrón estático mientras no se reproduce
+                        drawStaticPattern(canvasCtx, canvas.width, canvas.height);
+                        
+                        return canvasCtx;
+                    }
+
+                    // Dibujar patrón estático cuando no hay reproducción
+                  
+                    // Dibujar patrón estático cuando no hay reproducción
+                    function drawStaticPattern(canvasCtx, width, height) {
+                        canvasCtx.clearRect(0, 0, width, height);
+                        canvasCtx.fillStyle = 'black';
+                        
+                        const barWidth = 2;
+                        const gap = 1;
+                        const bars = Math.floor(width / (barWidth + gap));
+                        const centerY = height / 2;
+                        
+                        for (let i = 0; i < bars; i++) {
+                            // Crear un patrón de onda sinusoidal
+                            const x = i * (barWidth + gap);
+                            
+                            // Calcular posición normalizada (-1 a 1)
+                            const position = (i / bars) * 2 - 1;
+                            
+                            // Crear múltiples ondas y combinarlas
+                            const wave1 = Math.sin(position * Math.PI * 2);
+                            const wave2 = Math.sin(position * Math.PI * 3) * 0.5;
+                            const wave3 = Math.sin(position * Math.PI * 1) * 0.8;
+                            
+                            // Combinar las ondas para un patrón más natural
+                            const combinedWave = (wave1 + wave2 + wave3) / 2.5;
+                            
+                            // Calcular altura (entre 2 y 25 px)
+                            const barHeight = 2 + Math.abs(combinedWave * 25);
+                            
+                            // Dibujar la barra
+                            canvasCtx.fillRect(x, centerY - barHeight/2, barWidth, barHeight);
+                        }
+                    }
+
+
+
+                    // Función para animar el visualizador durante la reproducción
+                   // Función para animar el visualizador durante la reproducción
+                    function visualize() {
+                        if (!analyser || !isPlaying) return;
+                        
+                        const waveContainer = document.getElementById('wave-container');
+                        const canvas = waveContainer.querySelector('canvas');
+                        if (!canvas) return;
+                        
+                        const canvasCtx = canvas.getContext('2d');
+                        const width = canvas.width;
+                        const height = canvas.height;
+                        
+                        // Asegurarse de que el canvas se ajuste al tamaño del contenedor
+                        if (canvas.width !== waveContainer.clientWidth) {
+                            canvas.width = waveContainer.clientWidth;
+                        }
+                        
+                        // Obtener datos de frecuencia
+                        analyser.getByteFrequencyData(dataArray);
+                        
+                        // Limpiar canvas
+                        canvasCtx.clearRect(0, 0, width, height);
+                        canvasCtx.fillStyle = 'black';
+                        
+                        const barWidth = 2;
+                        const gap = 1;
+                        const bars = Math.floor(width / (barWidth + gap));
+                        const centerY = height / 2;
+                        
+                        // Dibujar patrón de onda manteniendo la forma similar al estado estático
+                        for (let i = 0; i < bars; i++) {
+                            const x = i * (barWidth + gap);
+                            
+                            // Calcular posición normalizada (-1 a 1)
+                            const position = (i / bars) * 2 - 1;
+                            
+                            // Crear patrón de onda base similar al estático
+                            const wave1 = Math.sin(position * Math.PI * 2);
+                            const wave2 = Math.sin(position * Math.PI * 3) * 0.5;
+                            const wave3 = Math.sin(position * Math.PI * 1) * 0.8;
+                            
+                            // Combinar las ondas para un patrón base natural
+                            const baseCombinedWave = (wave1 + wave2 + wave3) / 2.5;
+                            
+                            // Mapear índice de barra a índice de datos
+                            const dataIndex = Math.floor((i / bars) * dataArray.length);
+                            
+                            // Obtener valor de frecuencia (0-255)
+                            let value = dataArray[dataIndex] || 0;
+                            
+                            // Amplificar el patrón base según la intensidad del audio
+                            const amplifier = (value / 255) * 2 + 0.5; // Factor de amplificación basado en el audio
+                            
+                            // Calcular altura final de la barra
+                            const baseHeight = 2 + Math.abs(baseCombinedWave * 20);
+                            const barHeight = Math.min(baseHeight * amplifier, 48); // Limitar la altura máxima
+                            
+                            // Dibujar barra
+                            canvasCtx.fillRect(x, centerY - barHeight/2, barWidth, barHeight);
+                        }
+                        
+                        // Solicitar siguiente frame de animación
+                        animationId = requestAnimationFrame(visualize);
+                    }
+
+
+
+                    function visualizeCircular() {
+    if (!analyser || !isPlaying) return;
+    
+    const waveContainer = document.getElementById('wave-container');
+    const canvas = waveContainer.querySelector('canvas');
+    if (!canvas) return;
+    
+    const canvasCtx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Asegurarse de que el canvas se ajuste al tamaño del contenedor
+    if (canvas.width !== waveContainer.clientWidth) {
+        canvas.width = waveContainer.clientWidth;
+    }
+    
+    // Obtener datos de frecuencia
+    analyser.getByteFrequencyData(dataArray);
+    
+    // Limpiar canvas
+    canvasCtx.clearRect(0, 0, width, height);
+    
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(width, height) / 4; // Radio base
+    
+    const barCount = 100; // Número de barras en el círculo
+    
+    for (let i = 0; i < barCount; i++) {
+        const angle = (i * 2 * Math.PI) / barCount;
+        
+        // Mapear índice a datos de frecuencia
+        const dataIndex = Math.floor((i / barCount) * dataArray.length);
+        const value = dataArray[dataIndex] || 0;
+        
+        // Calcular longitud de la barra según frecuencia (min 5px, max basado en tamaño)
+        const barLength = (value / 255) * (Math.min(width, height) / 6) + 5;
+        
+        // Calcular coordenadas
+        const startX = centerX + Math.cos(angle) * radius;
+        const startY = centerY + Math.sin(angle) * radius;
+        const endX = centerX + Math.cos(angle) * (radius + barLength);
+        const endY = centerY + Math.sin(angle) * (radius + barLength);
+        
+        // Dibujar línea
+        canvasCtx.beginPath();
+        canvasCtx.moveTo(startX, startY);
+        canvasCtx.lineTo(endX, endY);
+        canvasCtx.lineWidth = 2;
+        canvasCtx.strokeStyle = 'black';
+        canvasCtx.stroke();
+    }
+    
+    // Solicitar siguiente frame
+    animationId = requestAnimationFrame(visualizeCircular);
+}
+
+
+function visualizeTimeDomain() {
+    if (!analyser || !isPlaying) return;
+    
+    const waveContainer = document.getElementById('wave-container');
+    const canvas = waveContainer.querySelector('canvas');
+    if (!canvas) return;
+    
+    const canvasCtx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Asegurarse de que el canvas se ajuste al tamaño del contenedor
+    if (canvas.width !== waveContainer.clientWidth) {
+        canvas.width = waveContainer.clientWidth;
+    }
+    
+    // Usar datos de tiempo en lugar de frecuencia
+    analyser.getByteTimeDomainData(dataArray);
+    
+    // Limpiar canvas
+    canvasCtx.clearRect(0, 0, width, height);
+    
+    canvasCtx.lineWidth = 2;
+    canvasCtx.strokeStyle = 'black';
+    canvasCtx.beginPath();
+    
+    const sliceWidth = width / dataArray.length;
+    let x = 0;
+    
+    for (let i = 0; i < dataArray.length; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = v * height / 2;
+        
+        if (i === 0) {
+            canvasCtx.moveTo(x, y);
+        } else {
+            canvasCtx.lineTo(x, y);
+        }
+        
+        x += sliceWidth;
+    }
+    
+    canvasCtx.lineTo(width, height / 2);
+    canvasCtx.stroke();
+    
+    // Solicitar siguiente frame
+    animationId = requestAnimationFrame(visualizeTimeDomain);
+}
+
+                    // Detener visualización
+                    function stopVisualization() {
+                        if (animationId) {
+                            cancelAnimationFrame(animationId);
+                            animationId = null;
+                            
+                            // Restaurar patrón estático
+                            const waveContainer = document.getElementById('wave-container');
+                            const canvas = waveContainer.querySelector('canvas');
+                            if (canvas) {
+                                const canvasCtx = canvas.getContext('2d');
+                                drawStaticPattern(canvasCtx, canvas.width, canvas.height);
+                            }
+                        }
+                    }
+
+
+            // Función para extraer fecha del nombre de archivo y formatearla bonita
+            function extractAndFormatDate(filename) {
+                // Patrón para extraer la fecha del formato reporte_semanal_DD.MM.YYYY.mp3
+                const pattern = /reporte_semanal_(\d{2})\.(\d{2})\.(\d{4})\.mp3$/;
+                const match = filename.match(pattern);
+                
+                if (!match) return null;
+                
+                const day = match[1];
+                const month = match[2];
+                const year = match[3];
+                
+                // Crear objeto Date (los meses en JavaScript son 0-indexados)
+                const date = new Date(year, parseInt(month) - 1, day);
+                
+                // Formatear la fecha como "d de Mes, Año"
+                const monthNames = [
+                    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+                ];
+                
+                return {
+                    displayDate: `${parseInt(day)} de ${monthNames[date.getMonth()]}, ${year}`,
+                    dateObj: date,
+                    filename: filename
+                };
+            }
+            
+            // Función para buscar dinámicamente archivos de podcast disponibles
+            function searchAvailablePodcasts() {
+                // Mensaje de búsqueda inicial
+                archiveList.innerHTML = '<li class="archive-item">Buscando resúmenes disponibles...</li>';
+                
+                // Lista para almacenar podcasts encontrados
+                let foundPodcasts = [];
+                
+                // Lista de archivos específicos para verificar (incluyendo el que ya sabemos que existe)
+                const filesToCheck = [
+                    'reporte_semanal_16.03.2025.mp3',  // Este archivo sabemos que existe
+                    'reporte_semanal_09.03.2025.mp3',
+                    'reporte_semanal_02.03.2025.mp3',
+                    'reporte_semanal_23.02.2025.mp3',
+                    'reporte_semanal_08.02.2025.mp3',
+                    'reporte_semanal_01.02.2025.mp3'
+                ];
+                
+                // Contador para seguir las verificaciones pendientes
+                let pendingChecks = filesToCheck.length;
+                
+                // Verificar cada archivo individualmente
+                filesToCheck.forEach(filename => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('HEAD', filename, true);
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
+                            pendingChecks--;
+                            
+                            if (xhr.status === 200) {
+                                // El archivo existe
+                                console.log(`Archivo encontrado: ${filename}`);
+                                const podcastInfo = extractAndFormatDate(filename);
+                                if (podcastInfo) {
+                                    foundPodcasts.push(podcastInfo);
+                                }
+                            } else {
+                                console.log(`Archivo no encontrado: ${filename} (status: ${xhr.status})`);
+                            }
+                            
+                            // Si ya verificamos todos los archivos
+                            if (pendingChecks === 0) {
+                                procesarPodcastsEncontrados(foundPodcasts);
+                            }
+                        }
+                    };
+                    xhr.send(null);
+                });
+            }
+            
+            // Procesar la lista de podcasts encontrados
+            function procesarPodcastsEncontrados(podcasts) {
+                console.log(`Podcasts encontrados: ${podcasts.length}`);
+                
+                // Ordenar podcasts por fecha (más reciente primero)
+                podcasts.sort((a, b) => b.dateObj - a.dateObj);
+                
+                // Limitar a los 5 más recientes
+                podcasts = podcasts.slice(0, 5);
+                
+                if (podcasts.length === 0) {
+                    archiveList.innerHTML = '<li class="archive-item">No hay resúmenes disponibles</li>';
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = 'No se encontraron archivos de audio.';
+                    playButton.disabled = true;
+                    playButton.style.opacity = 0.5;
+                    playButton.style.cursor = "not-allowed";
+                } else {
+                    // Actualizar la lista de archivos
+                    updateArchiveList(podcasts);
+                    
+                    // Cargar el podcast más reciente automáticamente
+                    loadPodcast(podcasts[0]);
+                    
+                    // Ocultar mensaje de error si se había mostrado
+                    errorMessage.style.display = 'none';
+                    playButton.disabled = false;
+                    playButton.style.opacity = 1;
+                    playButton.style.cursor = "pointer";
+                }
+            }
+
+
+
+            // Actualizar la lista de archivos en la interfaz
+            function updateArchiveList(podcasts) {
+                archiveList.innerHTML = '';
+                
+                podcasts.forEach(podcast => {
+                    const li = document.createElement('li');
+                    li.className = 'archive-item';
+                    li.innerHTML = `
+                        <span class="archive-item-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6"></path><path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"></path><path d="M12 12H3"></path><path d="M16 6H3"></path><path d="M12 18H3"></path></svg>
+                        </span>
+                        <span class="archive-item-date">${podcast.displayDate}</span>
+                    `;
+                    li.addEventListener('click', () => loadPodcast(podcast));
+                    archiveList.appendChild(li);
+                });
+            }
+            
+            // Formatear segundos a MM:SS
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = Math.floor(seconds % 60);
+                return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+            
+            // Actualizar la barra de progreso
+            function updateProgress() {
+                const percentage = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = `${percentage}%`;
+                currentTimeDisplay.textContent = formatTime(audio.currentTime);
+            }
+            
+        // Cambiar entre play y pausa
+            function togglePlayPause() {
+                if (!audio.src) return;
+                
+                if (isPlaying) {
+                    audio.pause();
+                    playIcon.style.display = 'block';
+                    pauseIcon.style.display = 'none';
+                    stopVisualization();
+                } else {
+                    if (audioContext && audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                    
+                    audio.play()
+                        .then(() => {
+                            playIcon.style.display = 'none';
+                            pauseIcon.style.display = 'block';
+                            visualizeTimeDomain();
+                        })
+                        .catch(error => {
+                            console.error('Error al reproducir:', error);
+                            errorMessage.style.display = 'block';
+                            errorMessage.textContent = 'Error al reproducir el audio.';
+                        });
+                }
+                isPlaying = !isPlaying;
+            }
+
+
+            
+           // Cargar y reproducir un podcast
+function loadPodcast(podcast) {
+    // Limpiar mensajes de error previos
+    errorMessage.style.display = 'none';
+    errorMessage.textContent = '';
+    
+    // Si hay un podcast reproduciéndose, detenerlo
+    if (isPlaying) {
+        audio.pause();
+        isPlaying = false;
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+        stopVisualization();
+    }
+    
+    try {
+        audio.src = podcast.filename;
+        audio.load();
+        currentPodcast = podcast.filename;
+        podcastDateDisplay.textContent = podcast.displayDate;
+        
+        // Inicializar o reiniciar el visualizador
+        initAudioVisualizer();
+        
+        // Habilitar controles
+        playButton.disabled = false;
+        playButton.style.opacity = 1;
+        playButton.style.cursor = "pointer";
+        
+        // Actualizar la interfaz cuando los metadatos estén disponibles
+        audio.addEventListener('loadedmetadata', function() {
+            durationDisplay.textContent = formatTime(audio.duration);
+        });
+        
+        // Manejo de errores específicos
+        audio.addEventListener('error', function(e) {
+            console.error('Error al cargar audio:', e);
+            errorMessage.style.display = 'block';
+            errorMessage.textContent = 'Archivo no encontrado o no se puede reproducir';
+        });
+    } catch (error) {
+        console.error('Error al cargar podcast:', error);
+        errorMessage.style.display = 'block';
+        errorMessage.textContent = 'Error al cargar el archivo.';
+    }
+}
+
+
+
+            
+            // Función para actualizar el icono de volumen según el nivel
+            function updateVolumeIcon() {
+                if (isMuted || audio.volume === 0) {
+                    volumeIcon.style.display = 'none';
+                    muteIcon.style.display = 'block';
+                    volumeLow.style.display = 'none';
+                    volumeHigh.style.display = 'none';
+                } else {
+                    volumeIcon.style.display = 'block';
+                    muteIcon.style.display = 'none';
+                    
+                    // Mostrar las ondas de volumen según el nivel
+                    if (audio.volume < 0.5) {
+                        volumeLow.style.display = 'block';
+                        volumeHigh.style.display = 'none';
+                    } else {
+                        volumeLow.style.display = 'block';
+                        volumeHigh.style.display = 'block';
+                    }
+                }
+            }
+            
+            // Función para alternar entre mute y sonido
+            function toggleMute() {
+                if (isMuted) {
+                    audio.volume = previousVolume;
+                    volumeSlider.value = previousVolume;
+                } else {
+                    previousVolume = audio.volume;
+                    audio.volume = 0;
+                    volumeSlider.value = 0;
+                }
+                isMuted = !isMuted;
+                updateVolumeIcon();
+            }
+            
+            // Event Listeners
+            playButton.addEventListener('click', togglePlayPause);
+            
+            muteButton.addEventListener('click', toggleMute);
+            
+            volumeSlider.addEventListener('input', function() {
+                audio.volume = this.value;
+                if (this.value > 0 && isMuted) {
+                    isMuted = false;
+                } else if (this.value == 0) {
+                    isMuted = true;
+                }
+                updateVolumeIcon();
+            });
+            
+            audio.addEventListener('timeupdate', updateProgress);
+            
+            audio.addEventListener('ended', function() {
+                isPlaying = false;
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+                audio.currentTime = 0;
+                updateProgress();
+             
+            });
+            
+            progressContainer.addEventListener('click', function(e) {
+                const clickPosition = e.offsetX / this.offsetWidth;
+                audio.currentTime = clickPosition * audio.duration;
+                updateProgress();
+            });
+            
+            // Inicializar visualizador
+            initAudioVisualizer();
+            
+            // Inicializar reproductor
+            searchAvailablePodcasts();
+            updateVolumeIcon();
+        });
+    </script>
+</body>
+</html>
+
