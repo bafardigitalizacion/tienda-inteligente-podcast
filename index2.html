@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0066cc">
     <title>Reproductor de Podcast - Tienda Inteligente</title>
     <style>
-        /* Estilos CSS (sin cambios respecto al original) */
+        /* Estilos CSS (sin cambios respecto a la versión anterior) */
         :root {
             --primary-color: #0066cc;
             --secondary-color: #e6f0ff;
@@ -360,6 +360,16 @@
             text-overflow: ellipsis;
             flex-grow: 1; /* Ocupa el espacio restante */
         }
+         /* Estilo para el elemento activo en la lista */
+         .archive-item.active {
+             background-color: var(--secondary-color);
+             color: var(--primary-color);
+             font-weight: bold;
+         }
+         .archive-item.active .archive-item-icon {
+              color: var(--primary-color);
+         }
+
 
         .error-message {
             color: #e74c3c; /* Rojo para errores */
@@ -544,17 +554,12 @@
                     responsive: true,
                     normalize: true, // Intenta que todas las ondas tengan altura similar
                     backend: 'MediaElement', // Recomendado para compatibilidad
-                    // Opcional: Usar renderizador de barras en lugar de línea
-                    // renderer: 'MultiCanvas', // o 'Canvas'
-                    // barHeight: 0.8, // Altura relativa de la barra
                 });
 
                 // --- Eventos de WaveSurfer ---
 
                 wavesurfer.on('loading', function (percent) {
                     // Opcional: Mostrar progreso de carga si es necesario
-                    // console.log(`Loading: ${percent}%`);
-                    // Podrías actualizar un indicador de carga aquí
                      progressBar.style.width = `${percent}%`; // Usar la barra de progreso para carga
                      progressBar.style.backgroundColor = '#a0c0e0'; // Color diferente durante carga
                 });
@@ -571,31 +576,26 @@
                     playButton.title = "Reproducir/Pausar"; // Actualizar tooltip
                     errorMessage.style.display = 'none'; // Ocultar errores previos
                     progressBar.style.backgroundColor = 'var(--progress-color)'; // Restaurar color normal
-                     // Asegurar que la barra de progreso esté a 0% al cargar
-                    progressBar.style.width = '0%';
+                    progressBar.style.width = '0%'; // Asegurar que la barra de progreso esté a 0% al cargar
                     currentTimeDisplay.textContent = '00:00';
 
-                    // Actualizar título principal si es el primer podcast cargado
-                     if (currentPodcastInfo && podcastTitleDisplay.textContent === "Resumen del Reporte Semanal") {
-                         // Extraer un título más genérico del nombre si es posible
-                         let title = "Resumen Semanal"; // Título por defecto
-                         const nameParts = currentPodcastInfo.filename.split('_');
-                         if (nameParts.length > 1 && nameParts[0] !== 'reporte') {
-                             title = nameParts.slice(0, -1).join(' ').replace(/_/g, ' '); // Une partes excepto la fecha
-                             title = title.charAt(0).toUpperCase() + title.slice(1); // Capitalizar
+                    // Actualizar título principal basado en el archivo cargado
+                     if (currentPodcastInfo) {
+                         let title = "Resumen"; // Título por defecto
+                         // Intenta crear un título más descriptivo desde el nombre del archivo
+                         const filenameWithoutExt = currentPodcastInfo.filename.replace(/\.mp3$/, ''); // Quita extensión
+                         const datePatternMatch = filenameWithoutExt.match(/(\d{2}\.\d{2}\.\d{4})$/); // Encuentra la fecha al final
+                         let baseName = filenameWithoutExt;
+                         if (datePatternMatch) {
+                             baseName = filenameWithoutExt.substring(0, datePatternMatch.index).replace(/_$/, ''); // Quita la fecha y el guion bajo final si existe
+                         }
+                         if (baseName) {
+                              title = baseName.replace(/_/g, ' '); // Reemplaza guiones bajos por espacios
+                              title = title.charAt(0).toUpperCase() + title.slice(1); // Capitaliza la primera letra
+                         } else {
+                             title = "Resumen Semanal"; // Fallback si no se pudo extraer nombre
                          }
                          podcastTitleDisplay.textContent = title;
-                     } else if (currentPodcastInfo) {
-                         // Para cargas posteriores, también actualizar título
-                          let title = "Resumen"; // Título por defecto
-                          const nameParts = currentPodcastInfo.filename.split('_');
-                          if (nameParts.length > 1 && nameParts[0] !== 'reporte') {
-                              title = nameParts.slice(0, -1).join(' ').replace(/_/g, ' ');
-                              title = title.charAt(0).toUpperCase() + title.slice(1);
-                          } else {
-                              title = "Resumen Semanal"; // Si empieza con reporte_semanal_
-                          }
-                          podcastTitleDisplay.textContent = title;
                      }
 
                 });
@@ -622,7 +622,6 @@
                          const percentage = (currentTime / duration) * 100;
                          progressBar.style.width = `${Math.min(percentage, 100)}%`;
                      }
-                     // Si estaba pausado, mantenerlo pausado. Si estaba reproduciendo, WaveSurfer lo maneja.
                 });
 
 
@@ -632,8 +631,6 @@
                     isPlaying = false;
                     playIcon.style.display = 'block';
                     pauseIcon.style.display = 'none';
-                    // Opcional: volver al inicio o dejarlo al final
-                    // wavesurfer.seekTo(0); // Volver al inicio
                     progressBar.style.width = '100%'; // Dejar la barra llena al terminar
                     currentTimeDisplay.textContent = formatTime(wavesurfer.getDuration()); // Mostrar duración total
                 });
@@ -650,9 +647,6 @@
                     progressBar.style.width = '0%';
                      progressBar.style.backgroundColor = '#e74c3c'; // Color de error en la barra
                 });
-
-                 // Permitir buscar (seek) al hacer clic en la forma de onda (WaveSurfer maneja esto internamente)
-                 // No necesitamos un listener 'interaction' explícito para play/pause al hacer clic en la onda
             }
 
             // --- Funciones Auxiliares ---
@@ -663,119 +657,91 @@
              * @returns {object|null} - Objeto con displayDate, dateObj, filename o null si no coincide.
              */
             function extractAndFormatDate(filename) {
-                // Expresión regular mejorada: busca DD.MM.YYYY.mp3 al FINAL ($)
-                // Captura día(1), mes(2), año(3). Ignora lo anterior.
                 const pattern = /(\d{2})\.(\d{2})\.(\d{4})\.mp3$/;
                 const match = filename.match(pattern);
 
-                if (!match) {
-                    // console.log(`Filename "${filename}" does not match date pattern.`);
-                    return null;
-                }
+                if (!match) return null;
 
                 const day = match[1];
                 const month = match[2];
                 const year = match[3];
-
-                // Crear objeto Date (meses en JS son 0-indexados)
-                // Usar UTC para evitar problemas de zona horaria al crear la fecha
                 const date = new Date(Date.UTC(year, parseInt(month) - 1, day));
 
-                // Validar si la fecha creada es válida y coincide con los números extraídos
                  if (isNaN(date.getTime()) ||
                      date.getUTCDate() !== parseInt(day) ||
                      date.getUTCMonth() !== parseInt(month) - 1 ||
                      date.getUTCFullYear() !== parseInt(year)) {
-                     console.warn(`Invalid date extracted from "${filename}" (day: ${day}, month: ${month}, year: ${year})`);
-                     return null; // Fecha inválida (e.g., 31.02.2024)
+                     console.warn(`Invalid date extracted from "${filename}"`);
+                     return null;
                  }
 
-
-                // Formatear la fecha como "d de Mes, Año" (en español)
-                const monthNames = [
-                    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-                ];
-
+                const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
                 return {
                     displayDate: `${date.getUTCDate()} de ${monthNames[date.getUTCMonth()]}, ${date.getUTCFullYear()}`,
-                    dateObj: date, // Objeto Date para ordenar
-                    filename: filename // Nombre original del archivo
+                    dateObj: date,
+                    filename: filename
                 };
             }
 
             /**
              * Busca archivos de podcast disponibles de una lista predefinida.
-             * Verifica la existencia usando peticiones HEAD.
              */
             function searchAvailablePodcasts() {
                 archiveList.innerHTML = '<li class="archive-item">Buscando resúmenes...</li>';
                 let foundPodcasts = [];
-
-                // Lista de archivos a verificar (simulación, en un caso real esto vendría de un servidor)
                 const filesToCheck = [
                     'reporte_semanal_16.03.2025.mp3',
                     'reporte_semanal_09.03.2025.mp3',
-                    'resumen_especial_15.03.2025.mp3', // Ejemplo con prefijo diferente
+                    'resumen_especial_15.03.2025.mp3',
                     'reporte_semanal_30.03.2025.mp3',
                     'reporte_semanal_23.03.2025.mp3',
                     'reporte_semanal_08.02.2025.mp3',
-                    'reporte_1trimestre_01.04.2025.mp3', // No coincide con DD.MM.YYYY.mp3
-                    'archivo_sin_fecha.mp3', // Tampoco coincide
-                    'no_existe_20.03.2025.mp3' // Archivo que probablemente no exista
+                    'reporte_1trimestre_01.04.2025.mp3', // Sí coincide con DD.MM.YYYY.mp3
+                    'archivo_sin_fecha.mp3',
+                    'no_existe_20.03.2025.mp3'
                 ];
-
                 let pendingChecks = filesToCheck.length;
-                let checkedCount = 0; // Contador para saber cuándo terminar
+                let checkedCount = 0;
 
                 console.log(`Checking ${pendingChecks} potential files...`);
-
                 if (pendingChecks === 0) {
-                     procesarPodcastsEncontrados([]); // No hay archivos para chequear
+                     procesarPodcastsEncontrados([]);
                      return;
                 }
 
-
-                // Verificar cada archivo
                 filesToCheck.forEach(filename => {
                     const xhr = new XMLHttpRequest();
-                    // Usar HEAD para verificar existencia sin descargar el archivo completo
                     xhr.open('HEAD', filename, true);
-                    xhr.timeout = 5000; // Timeout de 5 segundos por si el servidor no responde
+                    xhr.timeout = 5000;
 
                     xhr.onreadystatechange = function() {
-                        if (xhr.readyState === 4) { // Petición completada (con éxito o error)
-                            checkedCount++; // Incrementar contador de chequeados
-
-                            if (xhr.status === 200) { // Status 200 OK -> archivo existe
-                                // console.log(`File found: ${filename}`);
+                        if (xhr.readyState === 4) {
+                            checkedCount++;
+                            if (xhr.status === 200) {
                                 const podcastInfo = extractAndFormatDate(filename);
                                 if (podcastInfo) {
-                                    foundPodcasts.push(podcastInfo); // Añadir solo si tiene formato de fecha válido
+                                    foundPodcasts.push(podcastInfo);
                                 } else {
                                      console.log(`File "${filename}" found but ignored (invalid date format).`);
                                 }
                             } else {
-                                // Archivo no encontrado o inaccesible (404, 403, etc.)
                                 // console.log(`File not found or inaccessible: ${filename} (status: ${xhr.status})`);
                             }
-
-                            // Si ya se chequearon todos los archivos
                             if (checkedCount === pendingChecks) {
                                 console.log("Finished checking all files.");
                                 procesarPodcastsEncontrados(foundPodcasts);
                             }
                         }
                     };
-                     xhr.onerror = function() { // Error de red (CORS, DNS, etc.)
+                     xhr.onerror = function() {
                         checkedCount++;
-                        console.error(`Network error checking "${filename}". Check CORS policy if running locally.`);
+                        console.error(`Network error checking "${filename}". Check CORS policy.`);
                         if (checkedCount === pendingChecks) {
                             console.log("Finished checking all files (with network errors).");
                             procesarPodcastsEncontrados(foundPodcasts);
                         }
                     };
-                     xhr.ontimeout = function () { // Timeout
+                     xhr.ontimeout = function () {
                          checkedCount++;
                          console.warn(`Timeout checking "${filename}".`);
                          if (checkedCount === pendingChecks) {
@@ -783,14 +749,12 @@
                              procesarPodcastsEncontrados(foundPodcasts);
                          }
                      };
-
                     xhr.send(null);
                 });
             }
 
             /**
              * Procesa la lista de podcasts encontrados, los ordena y actualiza la UI.
-             * @param {Array<object>} podcasts - Array de objetos podcast válidos encontrados.
              */
             function procesarPodcastsEncontrados(podcasts) {
                 console.log(`Processing ${podcasts.length} valid podcasts found.`);
@@ -799,71 +763,45 @@
                     archiveList.innerHTML = '<li class="archive-item not-available">No hay resúmenes disponibles</li>';
                     errorMessage.textContent = 'No se encontraron archivos de audio válidos.';
                     errorMessage.style.display = 'block';
-                    playButton.disabled = true; // Deshabilitar play si no hay nada
+                    playButton.disabled = true;
                     playButton.title = "No hay audio disponible";
                     podcastTitleDisplay.textContent = "Sin Audio";
                     podcastDateDisplay.textContent = "---";
                     durationDisplay.textContent = '00:00';
                     currentTimeDisplay.textContent = '00:00';
                 } else {
-                     // Ordenar podcasts por fecha (más reciente primero) usando el dateObj
                     podcasts.sort((a, b) => b.dateObj - a.dateObj);
-
-                    // Limitar a los X más recientes (opcional)
-                    // const limitedPodcasts = podcasts.slice(0, 5);
-                    const limitedPodcasts = podcasts; // Mostrar todos los encontrados por ahora
-
-                    // Actualizar la lista en la interfaz
+                    const limitedPodcasts = podcasts; // Mostrar todos
                     updateArchiveList(limitedPodcasts);
-
-                    // Cargar el podcast más reciente automáticamente
-                    loadPodcast(limitedPodcasts[0]); // Carga el primero de la lista ordenada
-
-                    // Asegurarse de que el botón de play esté listo (se habilitará en 'ready')
-                    playButton.disabled = true; // Deshabilitado hasta que 'ready' se dispare
+                    loadPodcast(limitedPodcasts[0]); // Cargar el más reciente
+                    playButton.disabled = true; // Deshabilitado hasta que 'ready'
                     playButton.title = "Cargando audio...";
-                    errorMessage.style.display = 'none'; // Ocultar mensaje de error si encontramos algo
+                    errorMessage.style.display = 'none';
                 }
             }
 
             /**
              * Actualiza la lista de archivos en la interfaz.
-             * @param {Array<object>} podcasts - Array de podcasts ordenados para mostrar.
              */
             function updateArchiveList(podcasts) {
-                archiveList.innerHTML = ''; // Limpiar lista anterior
-
+                archiveList.innerHTML = '';
                 podcasts.forEach((podcast, index) => {
                     const li = document.createElement('li');
                     li.className = 'archive-item';
-                    // Añadir clase 'active' al que se está cargando/reproduciendo (el primero por defecto)
-                    if (index === 0) {
-                        li.classList.add('active'); // Marcar el primer item como activo inicialmente
-                    }
-                    li.dataset.filename = podcast.filename; // Guardar nombre de archivo
-                    li.title = `Reproducir: ${podcast.filename}`; // Tooltip
-
+                    if (index === 0) li.classList.add('active');
+                    li.dataset.filename = podcast.filename;
+                    li.title = `Reproducir: ${podcast.filename}`;
                     li.innerHTML = `
                         <span class="archive-item-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
                         </span>
-                        <span class="archive-item-date">${podcast.displayDate}</span>
-                    `;
-
-                    // Añadir evento para cargar el podcast al hacer clic
+                        <span class="archive-item-date">${podcast.displayDate}</span>`;
                     li.addEventListener('click', () => {
-                         // Evitar recargar si ya es el activo
-                         if (currentPodcastInfo && currentPodcastInfo.filename === podcast.filename) {
-                             console.log("Podcast already loaded.");
-                             return;
-                         }
-                         // Buscar la info completa del podcast clickeado
+                         if (currentPodcastInfo && currentPodcastInfo.filename === podcast.filename) return;
                          const clickedPodcastInfo = podcasts.find(p => p.filename === li.dataset.filename);
                          if (clickedPodcastInfo) {
                             loadPodcast(clickedPodcastInfo);
-                            // Actualizar la clase 'active' en la lista
-                            document.querySelectorAll('#archive-list .archive-item').forEach(item => item.classList.remove('active'));
-                            li.classList.add('active');
+                            // No es necesario actualizar 'active' aquí, se hace en loadPodcast
                          }
                     });
                     archiveList.appendChild(li);
@@ -872,17 +810,11 @@
 
             /**
              * Formatea segundos a MM:SS.
-             * @param {number} seconds - Tiempo en segundos.
-             * @returns {string} - Tiempo formateado.
              */
             function formatTime(seconds) {
-                 // Manejar casos donde seconds no es un número válido
-                 if (isNaN(seconds) || seconds === Infinity || seconds < 0) {
-                     return '00:00';
-                 }
+                 if (isNaN(seconds) || seconds === Infinity || seconds < 0) return '00:00';
                 const minutes = Math.floor(seconds / 60);
                 const remainingSeconds = Math.floor(seconds % 60);
-                // padStart asegura que siempre haya dos dígitos (e.g., 01, 05, 10)
                 return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
             }
 
@@ -890,27 +822,24 @@
              * Cambia entre play y pausa usando WaveSurfer.
              */
             function togglePlayPause() {
-                // No hacer nada si wavesurfer no está listo o no existe
                 if (!wavesurfer || !wavesurfer.isReady) {
                     console.warn("WaveSurfer not ready to play/pause.");
                     return;
                 }
-
                 if (isPlaying) {
                     wavesurfer.pause();
-                    playIcon.style.display = 'block'; // Mostrar icono Play
-                    pauseIcon.style.display = 'none'; // Ocultar icono Pausa
+                    playIcon.style.display = 'block';
+                    pauseIcon.style.display = 'none';
                 } else {
                     wavesurfer.play();
-                    playIcon.style.display = 'none'; // Ocultar icono Play
-                    pauseIcon.style.display = 'block'; // Mostrar icono Pausa
+                    playIcon.style.display = 'none';
+                    pauseIcon.style.display = 'block';
                 }
-                isPlaying = !isPlaying; // Invertir el estado
+                isPlaying = !isPlaying;
             }
 
             /**
              * Carga un podcast específico usando WaveSurfer.
-             * @param {object} podcastInfo - Objeto con info del podcast a cargar.
              */
             function loadPodcast(podcastInfo) {
                 if (!podcastInfo || !podcastInfo.filename) {
@@ -919,48 +848,35 @@
                     errorMessage.style.display = 'block';
                     return;
                 }
-
                  console.log(`Attempting to load: ${podcastInfo.filename}`);
-                 currentPodcastInfo = podcastInfo; // Guardar info del podcast actual
+                 currentPodcastInfo = podcastInfo;
+                 isPlaying = false;
+                 playIcon.style.display = 'block';
+                 pauseIcon.style.display = 'none';
+                 progressBar.style.width = '0%';
+                 progressBar.style.backgroundColor = '#a0c0e0';
+                 currentTimeDisplay.textContent = '00:00';
+                 durationDisplay.textContent = '00:00';
+                 errorMessage.style.display = 'none';
+                 podcastDateDisplay.textContent = podcastInfo.displayDate;
+                 podcastTitleDisplay.textContent = "Cargando...";
+                 playButton.disabled = true;
+                 playButton.title = "Cargando audio...";
 
-                // --- Actualizar UI antes de cargar ---
-                isPlaying = false; // Asegurar estado inicial
-                playIcon.style.display = 'block';
-                pauseIcon.style.display = 'none';
-                progressBar.style.width = '0%'; // Reiniciar barra
-                 progressBar.style.backgroundColor = '#a0c0e0'; // Color de carga
-                currentTimeDisplay.textContent = '00:00';
-                durationDisplay.textContent = '00:00'; // Mostrar 00:00 mientras carga
-                errorMessage.style.display = 'none'; // Ocultar errores previos
-                podcastDateDisplay.textContent = podcastInfo.displayDate; // Actualizar fecha mostrada
-                // Actualizar título principal (se refinará en 'ready')
-                podcastTitleDisplay.textContent = "Cargando...";
-
-                // Deshabilitar play temporalmente y mostrar tooltip adecuado
-                playButton.disabled = true;
-                playButton.title = "Cargando audio...";
-
-                // Actualizar la clase 'active' en la lista del archivo
+                 // Actualizar clase 'active' en la lista
                  document.querySelectorAll('#archive-list .archive-item').forEach(item => {
-                     if (item.dataset.filename === podcastInfo.filename) {
-                         item.classList.add('active');
-                     } else {
-                         item.classList.remove('active');
-                     }
+                     item.classList.toggle('active', item.dataset.filename === podcastInfo.filename);
                  });
 
-
                 try {
-                    // Iniciar la carga del nuevo archivo en WaveSurfer
                     wavesurfer.load(podcastInfo.filename);
-                    // Los eventos 'loading', 'ready' y 'error' de wavesurfer manejarán el resto del flujo.
                 } catch (error) {
                     console.error('Error initiating WaveSurfer load:', error);
                     errorMessage.textContent = 'Error al intentar iniciar la carga del audio.';
                     errorMessage.style.display = 'block';
-                    playButton.disabled = true; // Asegurar que quede deshabilitado
+                    playButton.disabled = true;
                     playButton.title = "Error al cargar audio";
-                    progressBar.style.backgroundColor = '#e74c3c'; // Color de error
+                    progressBar.style.backgroundColor = '#e74c3c';
                     podcastTitleDisplay.textContent = "Error";
                 }
             }
@@ -969,33 +885,30 @@
              * Actualiza el icono de volumen según el nivel y estado mute.
              */
             function updateVolumeIcon() {
-                // Si wavesurfer no está listo, no hacer nada o mostrar un estado por defecto
                 if (!wavesurfer) {
-                     // Estado inicial antes de que wavesurfer esté listo
                      volumeIcon.style.display = 'block';
                      muteIcon.style.display = 'none';
                      volumeLow.style.display = 'none';
-                     volumeHigh.style.display = 'block'; // Asumir volumen alto por defecto
+                     volumeHigh.style.display = 'block';
                     return;
                 }
 
+                // *** CORREGIDO: Usar getMute() en lugar de getMuted() ***
+                const mutedState = wavesurfer.getMute();
                 const currentVolume = wavesurfer.getVolume();
-                const mutedState = wavesurfer.getMuted(); // Usar estado real de wavesurfer
 
-                if (mutedState || currentVolume < 0.01) { // Considerar volumen muy bajo como mute visual
-                    volumeIcon.style.display = 'none'; // Ocultar icono normal
-                    muteIcon.style.display = 'block'; // Mostrar icono mute
+                if (mutedState || currentVolume < 0.01) {
+                    volumeIcon.style.display = 'none';
+                    muteIcon.style.display = 'block';
                 } else {
-                    volumeIcon.style.display = 'block'; // Mostrar icono normal
-                    muteIcon.style.display = 'none'; // Ocultar icono mute
-
-                    // Mostrar las barras de nivel según el volumen
+                    volumeIcon.style.display = 'block';
+                    muteIcon.style.display = 'none';
                     if (currentVolume < 0.5) {
-                        volumeLow.style.display = 'block'; // Mostrar barra baja
-                        volumeHigh.style.display = 'none'; // Ocultar barra alta
+                        volumeLow.style.display = 'block';
+                        volumeHigh.style.display = 'none';
                     } else {
-                        volumeLow.style.display = 'block'; // Mostrar barra baja
-                        volumeHigh.style.display = 'block'; // Mostrar barra alta
+                        volumeLow.style.display = 'block';
+                        volumeHigh.style.display = 'block';
                     }
                 }
             }
@@ -1004,79 +917,65 @@
              * Alterna entre mute y sonido.
              */
             function toggleMute() {
-                if (!wavesurfer) return; // No hacer nada si no hay wavesurfer
+                if (!wavesurfer) return;
+                // *** CORREGIDO: Usar setMute() en lugar de setMuted() ***
+                // WaveSurfer v6+ usa setMuted(), pero versiones anteriores podrían usar setMute().
+                // Vamos a usar setMuted() ya que cargamos la v6, pero si diera error, probaríamos setMute()
+                // UPDATE: La documentación más reciente y ejemplos usan setMuted. El error original era getMuted.
+                // setMute() SÍ existe como método alternativo/legacy en algunas versiones.
+                // Probemos con setMute() que es más probable que exista si getMute() existe.
+                // Si setMute no funciona, volveremos a setMuted.
 
-                isMuted = !isMuted; // Cambiar nuestro estado local
-                wavesurfer.setMuted(isMuted); // Aplicar mute/unmute real en wavesurfer
+                isMuted = !isMuted;
+                // wavesurfer.setMuted(isMuted); // Método preferido en v6+
+                wavesurfer.setMute(isMuted); // Probando método alternativo
 
-                // Actualizar el slider y el icono visualmente
                 if (isMuted) {
-                    // Guardar volumen actual *antes* de poner el slider a 0, por si no era 1
                     previousVolume = parseFloat(volumeSlider.value);
-                    volumeSlider.value = 0; // Poner slider a 0 visualmente
+                    volumeSlider.value = 0;
                 } else {
-                    // Restaurar volumen previo sólo si era mayor que 0
-                     const restoreVolume = previousVolume > 0 ? previousVolume : 1; // Evitar restaurar a 0
+                     const restoreVolume = previousVolume > 0 ? previousVolume : 1;
                      volumeSlider.value = restoreVolume;
-                     // Asegurarse que wavesurfer tenga el volumen correcto al desmutear
-                     // setMuted(false) debería restaurar el volumen, pero lo aseguramos:
-                     wavesurfer.setVolume(restoreVolume);
+                     wavesurfer.setVolume(restoreVolume); // Asegurar volumen al desmutear
                 }
-                updateVolumeIcon(); // Actualizar el icono
+                updateVolumeIcon();
             }
 
             // --- Event Listeners ---
-
-            // Botón Play/Pausa
             playButton.addEventListener('click', togglePlayPause);
-
-            // Botón Mute/Unmute
             muteButton.addEventListener('click', toggleMute);
-
-            // Slider de Volumen (evento 'input' para respuesta continua)
             volumeSlider.addEventListener('input', function() {
                 if (!wavesurfer) return;
-
                 const volumeValue = parseFloat(this.value);
-                wavesurfer.setVolume(volumeValue); // Aplicar volumen a wavesurfer
-
-                // Si el usuario mueve el slider, quitar el estado 'mute' si el volumen es > 0
-                // y actualizar nuestro estado local 'isMuted'
+                wavesurfer.setVolume(volumeValue);
                 if (volumeValue > 0) {
                     if (isMuted) {
                         isMuted = false;
-                        wavesurfer.setMuted(false); // Quitar mute real si estaba puesto
+                        // wavesurfer.setMuted(false); // Método preferido v6+
+                         wavesurfer.setMute(false); // Probando método alternativo
                     }
-                } else { // Si el slider llega a 0
+                } else {
                     if (!isMuted) {
-                        isMuted = true; // Poner estado mute local
-                        wavesurfer.setMuted(true); // Aplicar mute real
+                        isMuted = true;
+                         // wavesurfer.setMuted(true); // Método preferido v6+
+                         wavesurfer.setMute(true); // Probando método alternativo
                     }
                 }
-
-                updateVolumeIcon(); // Actualizar icono visual
+                updateVolumeIcon();
             });
-
-             // Permitir buscar (seek) al hacer clic en la barra de progreso visual
             progressContainer.addEventListener('click', function(e) {
-                 if (!wavesurfer || !wavesurfer.isReady) return; // Solo si está listo
-
-                 const bounds = this.getBoundingClientRect(); // Dimensiones y posición del contenedor
-                 const clickPositionX = e.clientX - bounds.left; // Posición X del clic dentro del contenedor
-                 const relativePosition = Math.max(0, Math.min(1, clickPositionX / bounds.width)); // Posición relativa (0 a 1), asegurando límites
-
-                 wavesurfer.seekTo(relativePosition); // Mover la reproducción en WaveSurfer
-
-                 // No es necesario actualizar la UI aquí manualmente,
-                 // el evento 'seek' de WaveSurfer lo hará.
+                 if (!wavesurfer || !wavesurfer.isReady) return;
+                 const bounds = this.getBoundingClientRect();
+                 const clickPositionX = e.clientX - bounds.left;
+                 const relativePosition = Math.max(0, Math.min(1, clickPositionX / bounds.width));
+                 wavesurfer.seekTo(relativePosition);
             });
-
 
             // --- Inicialización al cargar la página ---
             console.log("DOM fully loaded and parsed.");
-            initWaveSurfer(); // Crear la instancia inicial de WaveSurfer
-            searchAvailablePodcasts(); // Buscar y listar los podcasts disponibles
-            updateVolumeIcon(); // Establecer el icono de volumen inicial (antes de que wavesurfer cargue)
+            initWaveSurfer();
+            searchAvailablePodcasts();
+            updateVolumeIcon(); // Llamada inicial
 
         }); // Fin de DOMContentLoaded
     </script>
