@@ -21,264 +21,112 @@
         body, html {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--background-color);
-            margin: 0;
-            padding: 0;
-            color: var(--text-color);
-            height: 100%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin: 0; padding: 0; color: var(--text-color);
+            height: 100%; width: 100%; display: flex; justify-content: center; align-items: center;
         }
 
         .container {
-            width: 100%;
-            max-width: 600px;
-            margin: 20px;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
-            transition: all 0.3s ease;
+            width: 100%; max-width: 600px; margin: 20px; background-color: white;
+            border-radius: 12px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden; transition: all 0.3s ease;
         }
 
         .header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 18px 20px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.2rem;
+            background-color: var(--primary-color); color: white; padding: 18px 20px;
+            text-align: center; font-weight: bold; font-size: 1.2rem;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        .player-container {
-            padding: 25px;
-        }
-
-        .player-info {
-            display: flex;
-            align-items: center;
-            margin-bottom: 25px;
-        }
+        .player-container { padding: 25px; }
+        .player-info { display: flex; align-items: center; margin-bottom: 25px; }
 
         .podcast-image {
-            width: 70px;
-            height: 70px;
-            background-color: var(--secondary-color);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            color: var(--primary-color);
-            font-size: 24px;
-            box-shadow: 0 3px 10px rgba(0, 102, 204, 0.2);
-            transition: transform 0.2s;
-            flex-shrink: 0;
+            width: 70px; height: 70px; background-color: var(--secondary-color);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin-right: 15px; color: var(--primary-color); font-size: 24px;
+            box-shadow: 0 3px 10px rgba(0, 102, 204, 0.2); transition: transform 0.2s; flex-shrink: 0;
         }
-
-        .podcast-image:hover {
-            transform: scale(1.05);
-        }
-
-        .podcast-details {
-            flex-grow: 1;
-            min-width: 0;
-        }
-
+        .podcast-image:hover { transform: scale(1.05); }
+        .podcast-details { flex-grow: 1; min-width: 0; }
         .podcast-title {
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin-bottom: 8px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-weight: bold; font-size: 1.1rem; margin-bottom: 8px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-
-        .podcast-date {
-            color: #777;
-            font-size: 0.9rem;
-        }
-
-        .player-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+        .podcast-date { color: #777; font-size: 0.9rem; }
+        .player-controls { display: flex; flex-direction: column; gap: 15px; }
 
         /* --- Estilos para Indicadores de Carga --- */
         #waveform {
-            margin: 15px 0;
-            height: 60px;
-            width: 100%;
-            position: relative; /* Necesario para el pseudo-elemento */
-            background-color: #f0f0f0; /* Fondo mientras carga */
-            border-radius: 3px;
-            overflow: hidden;
+            margin: 15px 0; height: 60px; width: 100%; position: relative;
+            background-color: #f0f0f0; border-radius: 3px; overflow: hidden;
+            transition: background-color 0.3s ease;
         }
-        /* Animación de puntos suspensivos en el área de la onda */
+         #waveform:not(.loading) { background-color: transparent; }
         #waveform.loading::before {
-            content: '...';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2rem;
-            color: var(--primary-color);
-            animation: dots 1.5s infinite linear;
+            content: '...'; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); font-size: 2rem; color: var(--primary-color);
+            animation: dots 1.5s infinite linear; z-index: 1;
         }
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
-        }
-        /* Ocultar el contenido real de wavesurfer mientras carga */
-        #waveform.loading > wave {
-             opacity: 0;
-        }
-
+        @keyframes dots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60%, 100% { content: '...'; } }
 
         .progress-container {
-            background-color: #eee;
-            border-radius: 5px;
-            height: 6px;
-            position: relative;
-            cursor: pointer;
-            transition: height 0.2s;
-            width: 100%;
-            overflow: hidden;
+            background-color: #eee; border-radius: 5px; height: 6px; position: relative;
+            cursor: pointer; transition: height 0.2s; width: 100%; overflow: hidden;
         }
-        .progress-container:hover {
-            height: 8px;
-        }
-
+        .progress-container:hover { height: 8px; }
         .progress-bar {
-            background-color: var(--progress-color);
-            height: 100%;
-            border-radius: 5px;
-            width: 0%;
-            transition: width 0.1s linear;
-            display: block;
+            background-color: var(--progress-color); height: 100%; border-radius: 5px; width: 0%;
+            transition: width 0.1s linear, background-color 0.3s ease; display: block;
         }
-        /* Estilo animado para la barra de progreso durante la carga */
         .progress-bar.loading {
             background-color: var(--loading-color);
             background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
-            background-size: 1rem 1rem;
-            animation: progress-bar-stripes 1s linear infinite;
-            /* La anchura (width) la sigue controlando el evento 'loading' de JS */
+            background-size: 1rem 1rem; animation: progress-bar-stripes 1s linear infinite;
         }
-         /* Estilo para error en barra de progreso */
-         .progress-bar.error {
-             background-color: var(--error-color);
-             width: 100%; /* Llenar la barra en caso de error */
-             animation: none; /* Detener animación si la había */
-         }
-
-        @keyframes progress-bar-stripes {
-            from { background-position: 1rem 0; }
-            to { background-position: 0 0; }
-        }
+         .progress-bar.error { background-color: var(--error-color); width: 100%; animation: none; }
+        @keyframes progress-bar-stripes { from { background-position: 1rem 0; } to { background-position: 0 0; } }
         /* --- Fin Estilos Indicadores de Carga --- */
 
-
-        .time-display {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: #666;
-             padding: 0 5px;
-        }
-
-        .control-buttons {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 10px;
-        }
-
-        .volume-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 15px;
-            justify-content: center;
-        }
-
+        .time-display { display: flex; justify-content: space-between; font-size: 0.8rem; color: #666; padding: 0 5px; }
+        .control-buttons { display: flex; align-items: center; justify-content: center; margin-top: 10px; }
+        .volume-controls { display: flex; align-items: center; gap: 10px; margin-top: 15px; justify-content: center; }
         .volume-button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--primary-color);
-            padding: 8px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: none; border: none; cursor: pointer; color: var(--primary-color);
+            padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
             transition: background-color 0.2s, transform 0.2s;
         }
-        .volume-button:hover {
-            background-color: var(--secondary-color);
-            transform: scale(1.1);
-        }
-        .volume-button svg {
-             width: 20px;
-             height: 20px;
-        }
-
+        .volume-button:hover { background-color: var(--secondary-color); transform: scale(1.1); }
+        .volume-button svg { width: 20px; height: 20px; }
         .volume-slider {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100px;
-            height: 4px;
-            border-radius: 2px;
-            background: #ddd;
-            outline: none;
-            transition: all 0.2s;
-            cursor: pointer;
+            -webkit-appearance: none; appearance: none; width: 100px; height: 4px;
+            border-radius: 2px; background: #ddd; outline: none; transition: all 0.2s; cursor: pointer;
         }
         .volume-slider:hover { height: 5px; }
         .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 14px; height: 14px; border-radius: 50%;
+            -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%;
             background: var(--primary-color); cursor: pointer; transition: all 0.2s;
         }
         .volume-slider::-webkit-slider-thumb:hover { transform: scale(1.2); box-shadow: 0 0 5px rgba(0, 102, 204, 0.5); }
         .volume-slider::-moz-range-thumb {
-            width: 14px; height: 14px; border-radius: 50%;
-            background: var(--primary-color); cursor: pointer; border: none; transition: all 0.2s;
+            width: 14px; height: 14px; border-radius: 50%; background: var(--primary-color);
+            cursor: pointer; border: none; transition: all 0.2s;
         }
          .volume-slider::-moz-range-thumb:hover { transform: scale(1.2); box-shadow: 0 0 5px rgba(0, 102, 204, 0.5); }
-
         .play-button {
             background-color: var(--primary-color); color: white; border: none;
-            width: 60px; height: 60px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3); flex-shrink: 0;
+            width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3); flex-shrink: 0;
         }
          .play-button svg { width: 24px; height: 24px; }
         .play-button:hover { background-color: #0055aa; transform: scale(1.08); box-shadow: 0 6px 15px rgba(0, 85, 170, 0.4); }
         .play-button:active { transform: scale(0.95); background-color: #004488; box-shadow: 0 2px 8px rgba(0, 68, 136, 0.3); }
-         /* Botón deshabilitado */
-         .play-button:disabled {
-             background-color: var(--loading-color); /* Usar color de carga */
-             cursor: not-allowed; opacity: 0.7; box-shadow: none; transform: none;
-         }
+         .play-button:disabled { background-color: var(--loading-color); cursor: not-allowed; opacity: 0.7; box-shadow: none; transform: none; }
          .play-button:disabled:hover { background-color: var(--loading-color); transform: none; box-shadow: none; }
 
         .archive-section { margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }
         .archive-title { font-weight: bold; margin-bottom: 15px; font-size: 1.1rem; color: var(--primary-color); padding-left: 5px; }
-        .archive-list {
-            list-style: none; padding: 0; margin: 0; max-height: 150px;
-            overflow-y: auto; border: 1px solid #eee; border-radius: 8px;
-        }
-        .archive-item {
-            padding: 12px 15px; border-bottom: 1px solid #eee; cursor: pointer;
-            transition: all 0.2s ease; display: flex; align-items: center;
-        }
+        .archive-list { list-style: none; padding: 0; margin: 0; max-height: 150px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
+        .archive-item { padding: 12px 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; }
          .archive-item:last-child { border-bottom: none; }
         .archive-item.not-available { color: #999; cursor: not-allowed; text-decoration: line-through; background-color: #f9f9f9; }
         .archive-item.not-available:hover { background-color: #f9f9f9; transform: none; }
@@ -291,84 +139,46 @@
          .archive-item.active .archive-item-icon { color: var(--primary-color); }
 
         .error-message {
-            color: var(--error-color); font-size: 0.9rem; margin-top: 10px;
-            display: none; text-align: center; padding: 8px;
-            background-color: var(--error-bg-color); border: 1px solid var(--error-color); border-radius: 5px;
+            color: var(--error-color); font-size: 0.9rem; margin-top: 10px; display: none;
+            text-align: center; padding: 8px; background-color: var(--error-bg-color);
+            border: 1px solid var(--error-color); border-radius: 5px;
         }
 
-        /* Media Queries (sin cambios) */
-        @media (max-width: 480px) {
+        @media (max-width: 480px) { /* Media Queries sin cambios */
             .container { width: 95%; margin: 10px auto; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
             .player-container { padding: 20px; }
-            .player-info { flex-direction: row; align-items: center; margin-bottom: 20px; }
+            .player-info { align-items: center; margin-bottom: 20px; }
             .podcast-image { width: 60px; height: 60px; margin-right: 12px; font-size: 20px; }
-             .podcast-title { font-size: 1rem; }
-             .podcast-date { font-size: 0.85rem; }
-            .play-button { width: 55px; height: 55px; }
-             .play-button svg { width: 22px; height: 22px; }
-            #waveform { height: 50px; }
-             .volume-controls { gap: 8px; }
-             .volume-slider { width: 80px; }
-             .archive-list { max-height: 120px; }
-             .archive-item { padding: 10px 12px; }
+             .podcast-title { font-size: 1rem; } .podcast-date { font-size: 0.85rem; }
+            .play-button { width: 55px; height: 55px; } .play-button svg { width: 22px; height: 22px; }
+            #waveform { height: 50px; } .volume-controls { gap: 8px; } .volume-slider { width: 80px; }
+             .archive-list { max-height: 120px; } .archive-item { padding: 10px 12px; }
         }
     </style>
     <script src="https://unpkg.com/wavesurfer.js@6/dist/wavesurfer.js"></script>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            Tienda Inteligente - Reporte Semanal
-        </div>
+        <div class="header"> Tienda Inteligente - Reporte Semanal </div>
         <div class="player-container">
             <div class="player-info">
-                <div class="podcast-image">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
-                </div>
+                <div class="podcast-image"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg> </div>
                 <div class="podcast-details">
                     <div class="podcast-title" id="podcast-title">Resumen del Reporte Semanal</div>
                     <div class="podcast-date" id="podcast-date">Cargando...</div>
                     <div class="error-message" id="error-message"></div>
                 </div>
             </div>
-
             <div id="waveform"></div>
-
             <div class="player-controls">
-                <div class="progress-container" id="progress-container" title="Haz clic para avanzar/retroceder">
-                    <div class="progress-bar" id="progress-bar"></div>
-                </div>
-                <div class="time-display">
-                    <span id="current-time">00:00</span>
-                    <span id="duration">00:00</span>
-                </div>
-                <div class="control-buttons">
-                    <button class="play-button" id="play-button" aria-label="Reproducir/Pausar" disabled title="Cargando audio y onda...">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" id="play-icon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" id="pause-icon" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                    </button>
-                </div>
-                <div class="volume-controls">
-                     <button class="volume-button" id="mute-button" aria-label="Silenciar/Activar Sonido" title="Silenciar/Activar Sonido">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="volume-icon">
-                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" id="volume-low" style="display: none;"></path>
-                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" id="volume-high" style="display: block;"></path>
-                        </svg>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="mute-icon" style="display: none;">
-                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                            <line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line>
-                        </svg>
-                    </button>
-                    <input type="range" min="0" max="1" step="0.01" value="1" class="volume-slider" id="volume-slider" aria-label="Control de volumen" title="Ajustar volumen">
-                </div>
+                <div class="progress-container" id="progress-container" title="Haz clic para avanzar/retroceder"> <div class="progress-bar" id="progress-bar"></div> </div>
+                <div class="time-display"> <span id="current-time">00:00</span> <span id="duration">00:00</span> </div>
+                <div class="control-buttons"> <button class="play-button" id="play-button" aria-label="Reproducir/Pausar" disabled title="Cargando audio y onda..."> <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <svg id="pause-icon" style="display: none;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg> </button> </div>
+                <div class="volume-controls"> <button class="volume-button" id="mute-button" aria-label="Silenciar/Activar Sonido" title="Silenciar/Activar Sonido"> <svg id="volume-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon> <path id="volume-low" d="M15.54 8.46a5 5 0 0 1 0 7.07" style="display: none;"></path> <path id="volume-high" d="M19.07 4.93a10 10 0 0 1 0 14.14" style="display: block;"></path> </svg> <svg id="mute-icon" style="display: none;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon> <line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line> </svg> </button> <input type="range" min="0" max="1" step="0.01" value="1" class="volume-slider" id="volume-slider" aria-label="Control de volumen" title="Ajustar volumen"> </div>
             </div>
-
             <div class="archive-section">
                 <div class="archive-title">Resúmenes anteriores</div>
-                <ul class="archive-list" id="archive-list">
-                    <li class="archive-item">Buscando resúmenes disponibles...</li>
-                </ul>
+                <ul class="archive-list" id="archive-list"> <li class="archive-item">Buscando resúmenes disponibles...</li> </ul>
             </div>
         </div>
     </div>
@@ -393,7 +203,7 @@
             const volumeLow = document.getElementById('volume-low');
             const volumeHigh = document.getElementById('volume-high');
             const errorMessage = document.getElementById('error-message');
-            const waveformContainer = document.getElementById('waveform'); // Div contenedor
+            const waveformContainer = document.getElementById('waveform');
 
             // --- Estado del reproductor ---
             let wavesurfer;
@@ -404,30 +214,45 @@
 
             // --- Inicialización de WaveSurfer ---
             function initWaveSurfer() {
-                if (wavesurfer) { wavesurfer.destroy(); }
+                if (wavesurfer) {
+                    try { wavesurfer.destroy(); }
+                    catch (e) { console.warn("Error destroying previous WaveSurfer instance:", e); }
+                }
+                // *** CORRECCIÓN: NO borrar el innerHTML aquí tampoco ***
+                // waveformContainer.innerHTML = ''; // <- Eliminada esta línea
 
-                wavesurfer = WaveSurfer.create({
-                    container: waveformContainer, // Usar el div #waveform
-                    waveColor: '#cccccc',
-                    progressColor: 'var(--primary-color)',
-                    cursorWidth: 1, cursorColor: '#333', height: 60,
-                    barWidth: 2, barGap: 1, responsive: true, normalize: true,
-                    backend: 'MediaElement',
-                });
+                // Crear nueva instancia
+                try {
+                    wavesurfer = WaveSurfer.create({
+                        container: waveformContainer,
+                        waveColor: '#cccccc', progressColor: 'var(--primary-color)',
+                        cursorWidth: 1, cursorColor: '#333', height: 60,
+                        barWidth: 2, barGap: 1, responsive: true, normalize: true,
+                        backend: 'MediaElement',
+                    });
+                } catch (e) {
+                     console.error("Error creating WaveSurfer instance:", e);
+                     errorMessage.textContent = "Error al inicializar el reproductor.";
+                     errorMessage.style.display = 'block';
+                     // Deshabilitar todo si falla la creación
+                     playButton.disabled = true;
+                     progressContainer.style.pointerEvents = 'none'; // Deshabilitar clics en progreso
+                     return; // Salir si no se pudo crear
+                }
+
 
                 // --- Eventos de WaveSurfer ---
-
                 wavesurfer.on('loading', function (percent) {
-                    // Actualizar barra de progreso durante la descarga
                     progressBar.style.width = `${percent}%`;
-                    // Mantener estilo 'loading' (rayas animadas y color)
                     progressBar.classList.add('loading');
-                    waveformContainer.classList.add('loading'); // Mostrar puntos suspensivos
+                    waveformContainer.classList.add('loading');
                 });
 
                 wavesurfer.on('ready', function() {
-                    // Audio y onda listos
                     console.log("WaveSurfer ready for:", currentPodcastInfo?.filename);
+                    // Verificar si la instancia aún existe (podría haberse destruido mientras cargaba)
+                    if (!wavesurfer) return;
+
                     durationDisplay.textContent = formatTime(wavesurfer.getDuration());
                     const initialVolume = parseFloat(volumeSlider.value);
                     wavesurfer.setVolume(initialVolume);
@@ -438,7 +263,7 @@
 
                     // --- Quitar indicadores de carga ---
                     progressBar.classList.remove('loading');
-                    progressBar.classList.remove('error'); // Quitar posible estado de error previo
+                    progressBar.classList.remove('error');
                     progressBar.style.width = '0%'; // Reiniciar barra visual
                     waveformContainer.classList.remove('loading'); // Ocultar puntos suspensivos
 
@@ -450,20 +275,16 @@
                          const filenameWithoutExt = currentPodcastInfo.filename.replace(/\.mp3$/, '');
                          const datePatternMatch = filenameWithoutExt.match(/(\d{2}\.\d{2}\.\d{4})$/);
                          let baseName = filenameWithoutExt;
-                         if (datePatternMatch) {
-                             baseName = filenameWithoutExt.substring(0, datePatternMatch.index).replace(/_$/, '');
-                         }
-                         if (baseName) {
-                              title = baseName.replace(/_/g, ' ');
-                              title = title.charAt(0).toUpperCase() + title.slice(1);
-                         } else { title = "Resumen Semanal"; }
+                         if (datePatternMatch) { baseName = filenameWithoutExt.substring(0, datePatternMatch.index).replace(/_$/, ''); }
+                         if (baseName) { title = baseName.replace(/_/g, ' '); title = title.charAt(0).toUpperCase() + title.slice(1); }
+                         else { title = "Resumen Semanal"; }
                          podcastTitleDisplay.textContent = title;
                      }
                 });
 
                 wavesurfer.on('audioprocess', function() {
-                    // Actualizar tiempo y barra durante reproducción
-                    if (!progressBar.classList.contains('loading')) { // No actualizar si aún carga
+                    if (!wavesurfer) return; // Verificar instancia
+                    if (!progressBar.classList.contains('loading')) {
                         const currentTime = wavesurfer.getCurrentTime();
                         currentTimeDisplay.textContent = formatTime(currentTime);
                         const duration = wavesurfer.getDuration();
@@ -475,7 +296,7 @@
                 });
 
                 wavesurfer.on('seek', function() {
-                     // Actualizar tiempo y barra al buscar manualmente
+                     if (!wavesurfer) return; // Verificar instancia
                      const currentTime = wavesurfer.getCurrentTime();
                      currentTimeDisplay.textContent = formatTime(currentTime);
                      const duration = wavesurfer.getDuration();
@@ -486,35 +307,35 @@
                 });
 
                 wavesurfer.on('finish', function() {
-                    // Al terminar reproducción
                     console.log("Playback finished");
                     isPlaying = false;
-                    playIcon.style.display = 'block';
-                    pauseIcon.style.display = 'none';
+                    playIcon.style.display = 'block'; pauseIcon.style.display = 'none';
                     progressBar.style.width = '100%';
-                    currentTimeDisplay.textContent = formatTime(wavesurfer.getDuration());
+                    // Mantener el tiempo final al terminar
+                    if(wavesurfer) {
+                        currentTimeDisplay.textContent = formatTime(wavesurfer.getDuration());
+                    }
                 });
 
                 wavesurfer.on('error', function(err) {
-                    // Manejo de errores
                     console.error('WaveSurfer error:', err);
-                    errorMessage.textContent = `Error al cargar audio: ${err}`;
-                    errorMessage.style.display = 'block';
-                    playButton.disabled = true; // Mantener deshabilitado
-                    playButton.title = "Error al cargar audio";
-                    durationDisplay.textContent = '00:00';
-                    currentTimeDisplay.textContent = '00:00';
-
-                    // --- Quitar indicadores de carga y poner estado de error ---
-                    progressBar.classList.remove('loading');
-                    progressBar.classList.add('error'); // Añadir clase de error
-                    waveformContainer.classList.remove('loading'); // Ocultar puntos
-                    // Opcional: Mostrar icono/mensaje de error en el área de la onda
+                    errorMessage.textContent = `Error al cargar audio: ${err}`; errorMessage.style.display = 'block';
+                    playButton.disabled = true; playButton.title = "Error al cargar audio";
+                    durationDisplay.textContent = '00:00'; currentTimeDisplay.textContent = '00:00';
+                    progressBar.classList.remove('loading'); progressBar.classList.add('error');
+                    waveformContainer.classList.remove('loading');
                     waveformContainer.innerHTML = '<span style="color: var(--error-color); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">⚠ Error</span>';
                 });
+
+                 // Limpiar instancia al descargar la página (buena práctica)
+                 window.addEventListener('unload', () => {
+                     if (wavesurfer) {
+                         wavesurfer.destroy();
+                     }
+                 });
             }
 
-            // --- Funciones Auxiliares --- (Sin cambios extractAndFormatDate, searchAvailablePodcasts, procesarPodcastsEncontrados, updateArchiveList, formatTime)
+            // --- Funciones Auxiliares ---
              function extractAndFormatDate(filename) {
                 const pattern = /(\d{2})\.(\d{2})\.(\d{4})\.mp3$/;
                 const match = filename.match(pattern);
@@ -560,15 +381,12 @@
                     playButton.disabled = true; playButton.title = "No hay audio disponible";
                     podcastTitleDisplay.textContent = "Sin Audio"; podcastDateDisplay.textContent = "---";
                     durationDisplay.textContent = '00:00'; currentTimeDisplay.textContent = '00:00';
-                     // Limpiar área de onda en caso de error inicial sin podcasts
-                     waveformContainer.innerHTML = '';
-                     progressBar.classList.add('error'); // Marcar barra como error
+                    waveformContainer.innerHTML = ''; progressBar.classList.add('error');
                 } else {
                     podcasts.sort((a, b) => b.dateObj - a.dateObj);
                     updateArchiveList(podcasts);
                     loadPodcast(podcasts[0]); // Cargar el más reciente
-                    playButton.disabled = true; // Deshabilitado hasta que 'ready'
-                    playButton.title = "Cargando audio y onda...";
+                    playButton.disabled = true; playButton.title = "Cargando audio y onda...";
                     errorMessage.style.display = 'none';
                 }
             }
@@ -593,9 +411,7 @@
                 return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
             }
 
-
             // --- Funciones de Control ---
-
             function togglePlayPause() {
                 if (!wavesurfer || !wavesurfer.isReady) { console.warn("WaveSurfer not ready to play/pause."); return; }
                 if (isPlaying) {
@@ -605,29 +421,17 @@
                 }
                 isPlaying = !isPlaying;
             }
-
             function loadPodcast(podcastInfo) {
                 if (!podcastInfo || !podcastInfo.filename) { console.error("Invalid podcast info provided."); errorMessage.textContent = 'Error interno.'; errorMessage.style.display = 'block'; return; }
-
                  console.log(`Attempting to load: ${podcastInfo.filename}`);
                  currentPodcastInfo = podcastInfo;
-                 isPlaying = false; // Reset play state
-                 playIcon.style.display = 'block'; pauseIcon.style.display = 'none'; // Reset icons
-
-                 // --- Establecer Estado Visual de Carga ---
-                 errorMessage.style.display = 'none'; // Ocultar errores previos
-                 podcastDateDisplay.textContent = podcastInfo.displayDate;
-                 podcastTitleDisplay.textContent = "Cargando audio y onda..."; // Nuevo texto de carga
-                 playButton.disabled = true; // DESHABILITAR PLAY
-                 playButton.title = "Cargando audio y onda...";
+                 isPlaying = false; playIcon.style.display = 'block'; pauseIcon.style.display = 'none';
+                 errorMessage.style.display = 'none'; podcastDateDisplay.textContent = podcastInfo.displayDate;
+                 podcastTitleDisplay.textContent = "Cargando audio y onda...";
+                 playButton.disabled = true; playButton.title = "Cargando audio y onda...";
                  currentTimeDisplay.textContent = '00:00'; durationDisplay.textContent = '00:00';
-                 progressBar.style.width = '0%'; // Iniciar barra en 0%
-                 progressBar.classList.remove('error'); // Quitar posible estado de error
-                 progressBar.classList.add('loading'); // Añadir clase para animación y color de carga
+                 progressBar.style.width = '0%'; progressBar.classList.remove('error'); progressBar.classList.add('loading');
                  waveformContainer.classList.add('loading'); // Mostrar animación de puntos
-                 // Limpiar contenido anterior de waveform por si hubo error previo
-                 waveformContainer.innerHTML = '';
-
 
                  // Actualizar clase 'active' en la lista
                  document.querySelectorAll('#archive-list .archive-item').forEach(item => {
@@ -635,7 +439,16 @@
                  });
 
                 try {
-                    // Iniciar carga en WaveSurfer (los eventos 'loading', 'ready', 'error' manejarán el resto)
+                    // Asegurar que la instancia exista antes de cargar
+                    if (!wavesurfer) {
+                        initWaveSurfer();
+                        if (!wavesurfer) throw new Error("Failed to initialize WaveSurfer."); // Salir si aún falla
+                    }
+                    // Limpiar el contenedor JUSTO ANTES de llamar a load, DESPUÉS de crear/asegurar la instancia
+                    // Esto es un intento intermedio si destroy() solo no funciona
+                    // waveformContainer.innerHTML = ''; // <-- Re-eliminado, confiamos en destroy() y la creación limpia
+
+                    // Llamar a load en la instancia existente
                     wavesurfer.load(podcastInfo.filename);
                 } catch (error) {
                     console.error('Error initiating WaveSurfer load:', error);
@@ -647,34 +460,42 @@
                     podcastTitleDisplay.textContent = "Error";
                 }
             }
-
             function updateVolumeIcon() {
-                if (!wavesurfer) { /* Estado inicial antes de cargar */
+                if (!wavesurfer) { /* Estado inicial */
                      volumeIcon.style.display = 'block'; muteIcon.style.display = 'none';
                      volumeLow.style.display = 'none'; volumeHigh.style.display = 'block'; return;
                 }
-                const mutedState = wavesurfer.getMute(); // Corregido
-                const currentVolume = wavesurfer.getVolume();
-                if (mutedState || currentVolume < 0.01) {
-                    volumeIcon.style.display = 'none'; muteIcon.style.display = 'block';
-                } else {
-                    volumeIcon.style.display = 'block'; muteIcon.style.display = 'none';
-                    if (currentVolume < 0.5) { volumeLow.style.display = 'block'; volumeHigh.style.display = 'none'; }
-                    else { volumeLow.style.display = 'block'; volumeHigh.style.display = 'block'; }
+                // Asegurarse que wavesurfer y sus métodos existen antes de llamarlos
+                try {
+                    const mutedState = wavesurfer.getMute();
+                    const currentVolume = wavesurfer.getVolume();
+                    if (mutedState || currentVolume < 0.01) {
+                        volumeIcon.style.display = 'none'; muteIcon.style.display = 'block';
+                    } else {
+                        volumeIcon.style.display = 'block'; muteIcon.style.display = 'none';
+                        if (currentVolume < 0.5) { volumeLow.style.display = 'block'; volumeHigh.style.display = 'none'; }
+                        else { volumeLow.style.display = 'block'; volumeHigh.style.display = 'block'; }
+                    }
+                } catch (e) {
+                    console.error("Error updating volume icon:", e);
+                    // Podría pasar si wavesurfer se destruye inesperadamente
                 }
             }
-
             function toggleMute() {
                 if (!wavesurfer) return;
-                isMuted = !isMuted;
-                wavesurfer.setMute(isMuted); // Corregido
-                if (isMuted) {
-                    previousVolume = parseFloat(volumeSlider.value); volumeSlider.value = 0;
-                } else {
-                     const restoreVolume = previousVolume > 0 ? previousVolume : 1;
-                     volumeSlider.value = restoreVolume; wavesurfer.setVolume(restoreVolume);
+                try {
+                    isMuted = !isMuted;
+                    wavesurfer.setMute(isMuted);
+                    if (isMuted) {
+                        previousVolume = parseFloat(volumeSlider.value); volumeSlider.value = 0;
+                    } else {
+                         const restoreVolume = previousVolume > 0 ? previousVolume : 1;
+                         volumeSlider.value = restoreVolume; wavesurfer.setVolume(restoreVolume);
+                    }
+                    updateVolumeIcon();
+                } catch (e) {
+                    console.error("Error toggling mute:", e);
                 }
-                updateVolumeIcon();
             }
 
             // --- Event Listeners ---
@@ -682,27 +503,31 @@
             muteButton.addEventListener('click', toggleMute);
             volumeSlider.addEventListener('input', function() {
                 if (!wavesurfer) return;
-                const volumeValue = parseFloat(this.value); wavesurfer.setVolume(volumeValue);
-                if (volumeValue > 0) {
-                    if (isMuted) { isMuted = false; wavesurfer.setMute(false); } // Corregido
-                } else {
-                    if (!isMuted) { isMuted = true; wavesurfer.setMute(true); } // Corregido
-                }
-                updateVolumeIcon();
+                try {
+                    const volumeValue = parseFloat(this.value); wavesurfer.setVolume(volumeValue);
+                    if (volumeValue > 0) { if (isMuted) { isMuted = false; wavesurfer.setMute(false); } }
+                    else { if (!isMuted) { isMuted = true; wavesurfer.setMute(true); } }
+                    updateVolumeIcon();
+                } catch (e) { console.error("Error setting volume:", e); }
             });
             progressContainer.addEventListener('click', function(e) {
                  if (!wavesurfer || !wavesurfer.isReady) return;
-                 const bounds = this.getBoundingClientRect();
-                 const clickPositionX = e.clientX - bounds.left;
-                 const relativePosition = Math.max(0, Math.min(1, clickPositionX / bounds.width));
-                 wavesurfer.seekTo(relativePosition);
+                 try {
+                     const bounds = this.getBoundingClientRect();
+                     const clickPositionX = e.clientX - bounds.left;
+                     const relativePosition = Math.max(0, Math.min(1, clickPositionX / bounds.width));
+                     wavesurfer.seekTo(relativePosition);
+                 } catch(e) { console.error("Error seeking:", e); }
             });
 
             // --- Inicialización ---
             console.log("DOM fully loaded and parsed.");
-            initWaveSurfer();
-            searchAvailablePodcasts(); // Inicia la búsqueda y carga del primer podcast
-            updateVolumeIcon(); // Establece icono de volumen inicial
+            initWaveSurfer(); // Crear la primera instancia de wavesurfer
+            // Solo buscar podcasts si la inicialización fue exitosa
+            if (wavesurfer) {
+                 searchAvailablePodcasts(); // Inicia la búsqueda y carga del primer podcast
+                 updateVolumeIcon(); // Establece icono de volumen inicial
+            }
 
         }); // Fin DOMContentLoaded
     </script>
