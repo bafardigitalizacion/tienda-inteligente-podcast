@@ -100,26 +100,53 @@
             gap: 15px;
         }
         
-     
-       /* Visualizador de ondas */
-            .wave-container {
-                height: 60px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin: 15px 0;
-                padding: 0;
-                gap: 3px;
-            }
-
-            .wave-bar {
-                width: 3px;
-                background-color: #000;
-                border-radius: 3px;
-                margin: 0;
-                height: 5px;
-                transition: height 0.2s ease;
-            }
+        /* Loader para indicar carga */
+        .loader {
+            border: 3px solid var(--secondary-color);
+            border-radius: 50%;
+            border-top: 3px solid var(--primary-color);
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Estado del waveform */
+        .waveform-container {
+            position: relative;
+            margin: 15px 0;
+            height: 60px;
+        }
+        
+        #waveform {
+            height: 60px;
+        }
+        
+        .waveform-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.7);
+            z-index: 10;
+        }
+        
+        .waveform-loading-text {
+            font-size: 14px;
+            color: var(--primary-color);
+            margin-left: 10px;
+        }
+        
         .progress-container {
             background-color: #eee;
             border-radius: 5px;
@@ -300,6 +327,13 @@
             display: none;
         }
         
+        .status-message {
+            color: #3498db;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+        
         @media (max-width: 480px) {
             .container {
                 width: 95%;
@@ -323,7 +357,11 @@
                 height: 50px;
             }
             
-            .wave-container {
+            .waveform-container {
+                height: 50px;
+            }
+            
+            #waveform {
                 height: 50px;
             }
             
@@ -333,8 +371,7 @@
         }
     </style>
 
-<script src="https://unpkg.com/wavesurfer.js@6/dist/wavesurfer.js"></script>
-
+    <script src="https://unpkg.com/wavesurfer.js@6/dist/wavesurfer.js"></script>
 </head>
 <body>
     <div class="container">
@@ -347,14 +384,21 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
                 </div>
                 <div class="podcast-details">
-                    <div class="podcast-title">Resumen del Reporte Semanal de Tienda Inteligente</div>
+                    <div class="podcast-title">Resumen de Tienda Inteligente</div>
                     <div class="podcast-date" id="podcast-date">Cargando...</div>
                     <div class="error-message" id="error-message"></div>
+                    <div class="status-message" id="status-message"></div>
                 </div>
             </div>
             
-            <!-- Visualizador de ondas -->
-            <div id="waveform" style="margin: 15px 0; height: 60px;"></div>
+            <!-- Visualizador de ondas con indicador de carga -->
+            <div class="waveform-container">
+                <div id="waveform"></div>
+                <div class="waveform-loading" id="waveform-loading">
+                    <div class="loader"></div>
+                    <span class="waveform-loading-text">Cargando audio...</span>
+                </div>
+            </div>
             
             <div class="player-controls">
                 <div class="progress-container" id="progress-container">
@@ -366,7 +410,7 @@
                 </div>
                 <div class="control-buttons">
                     <div></div>
-                    <button class="play-button" id="play-button">
+                    <button class="play-button" id="play-button" disabled>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="play-icon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="pause-icon" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
                     </button>
@@ -385,7 +429,12 @@
             <div class="archive-section">
                 <div class="archive-title">Resúmenes anteriores</div>
                 <ul class="archive-list" id="archive-list">
-                    <li class="archive-item">Buscando resúmenes disponibles...</li>
+                    <li class="archive-item">
+                        <span class="archive-item-icon">
+                            <div class="loader" style="display: inline-block;"></div>
+                        </span>
+                        <span class="archive-item-date">Buscando resúmenes disponibles...</span>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -408,168 +457,23 @@
             const volumeLow = document.getElementById('volume-low');
             const volumeHigh = document.getElementById('volume-high');
             const errorMessage = document.getElementById('error-message');
-            const waveContainer = document.getElementById('wave-container');
+            const statusMessage = document.getElementById('status-message');
+            const waveformLoading = document.getElementById('waveform-loading');
             
-           // const audio = new Audio();  // Comentado porque usamos WaveSurfer para la reproducción
             let isPlaying = false;
             let isMuted = false;
             let currentPodcast = '';
             let previousVolume = 1;
-            let audioContext;
-            let analyser;
-            let dataArray;
-            let waveBars = [];
-            let animationId;
+            let wavesurfer;
             
-          // Crear visualizador de ondas
-            function createWaveVisualizer() {
-                // Crear barras para el visualizador (más barras para un efecto como Spotify)
-                for (let i = 0; i < 50; i++) {
-                    const bar = document.createElement('div');
-                    bar.className = 'wave-bar';
-                    waveContainer.appendChild(bar);
-                    waveBars.push(bar);
-                }
-                
-                // Establecer altura variable para el estado estático
-                
-            }
+            // Mostrar loader de waveform inicialmente
+            waveformLoading.style.display = 'flex';
+            document.querySelector('.loader').style.display = 'block';
             
-              // Patrón estático para cuando no hay reproducción
-           // Patrón estático para cuando no hay reproducción
-            function setStaticWavePattern() {
-                const centerIndex = Math.floor(waveBars.length / 2);
-                
-                // Crear un patrón de onda sinusoidal como en la imagen
-                waveBars.forEach((bar, index) => {
-                    // Calcular posición relativa (-1 a 1)
-                    const position = (index - centerIndex) / centerIndex;
-                    
-                    // Crear un patrón de onda con múltiples frecuencias
-                    const wave1 = Math.sin(position * Math.PI * 2);
-                    const wave2 = Math.sin(position * Math.PI * 4) * 0.5;
-                    const wave3 = Math.sin(position * Math.PI * 1) * 0.8;
-                    
-                    // Combinar las ondas
-                    const combinedWave = (wave1 + wave2 + wave3) / 2.3;
-                    
-                    // Convertir a altura (entre 5px y 45px)
-                    const height = 5 + ((combinedWave + 1) / 2) * 40;
-                    
-                    // Aplicar altura
-                    bar.style.height = `${Math.abs(height)}px`;
-    });
-}
-            
-            // Inicializar el analizador de audio
-            /*function setupAudioAnalyser() {
-                try {
-                    // Crear contexto de audio si aún no existe
-                    if (!audioContext) {
-                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                        const source = audioContext.createMediaElementSource(audio);
-                        analyser = audioContext.createAnalyser();
-                        
-                        // Configurar análisis de frecuencia
-                        analyser.fftSize = 128;
-                        const bufferLength = analyser.frequencyBinCount;
-                        dataArray = new Uint8Array(bufferLength);
-                        
-                        // Conectar el flujo de audio
-                        source.connect(analyser);
-                        analyser.connect(audioContext.destination);
-                    }
-                } catch (error) {
-                    console.error('Error al configurar el analizador de audio:', error);
-                }
-            }*/
-            
-             // Actualizar el visualizador de ondas durante la reproducción
-           // Actualizar el visualizador de ondas durante la reproducción
-            function updateWaveVisualizer() {
-                if (!analyser || !isPlaying) return;
-                
-                analyser.getByteFrequencyData(dataArray);
-                
-                // Mapear los datos de frecuencia a las barras
-                const step = Math.floor(dataArray.length / waveBars.length);
-                
-                for (let i = 0; i < waveBars.length; i++) {
-                    const dataIndex = i * step;
-                    // Convertir el valor de frecuencia a una altura de barra
-                    const value = dataArray[dataIndex] || 0;
-                    // Altura mínima de 5px, máxima de 50px para que se vea como la imagen
-                    const height = 5 + (value / 255) * 45;
-                    
-                    // Todos en negro como en la imagen
-                    waveBars[i].style.backgroundColor = "#000";
-                    waveBars[i].style.height = `${height}px`;
-                }
-                
-                
-            }
-            
-            // Función para detener la animación del visualizador
-            function stopWaveVisualizer() {
-                if (animationId) {
-                    cancelAnimationFrame(animationId);
-                    animationId = null;
-                }
-               
-            }
-
-
-            // Inicializar WaveSurfer
-                let wavesurfer;
-
-                // Inicializar WaveSurfer
-                function initWaveSurfer() {
-                    // Limpiar instancia anterior si existe
-                    if (wavesurfer) {
-                        wavesurfer.destroy();
-                    }
-                    
-                    // Crear nueva instancia
-                    wavesurfer = WaveSurfer.create({
-                        container: '#waveform',
-                        waveColor: '#000',
-                        progressColor: '#0066cc',
-                        cursorWidth: 0,
-                        height: 60,
-                        barWidth: 2,
-                        barGap: 1,
-                        responsive: true,
-                        normalize: true
-                    });
-                    
-                    // Eventos
-                    wavesurfer.on('ready', function() {
-                        durationDisplay.textContent = formatTime(wavesurfer.getDuration());
-                        
-                        // Establecer volumen inicial
-                        const initialVolume = parseFloat(volumeSlider.value);
-                        wavesurfer.setVolume(initialVolume);
-                        updateVolumeIcon();
-                    });
-                    
-                    wavesurfer.on('audioprocess', function() {
-                        currentTimeDisplay.textContent = formatTime(wavesurfer.getCurrentTime());
-                        const percentage = (wavesurfer.getCurrentTime() / wavesurfer.getDuration()) * 100;
-                        progressBar.style.width = `${percentage}%`;
-                    });
-                    
-                    wavesurfer.on('finish', function() {
-                        isPlaying = false;
-                        playIcon.style.display = 'block';
-                        pauseIcon.style.display = 'none';
-                    });
-                }
-
-
-            // Función para extraer fecha del nombre de archivo y formatearla bonita
+            // Función para extraer fecha de cualquier nombre de archivo
             function extractAndFormatDate(filename) {
-                // Patrón para extraer la fecha del formato reporte_semanal_DD.MM.YYYY.mp3
-                const pattern = /reporte_semanal_(\d{2})\.(\d{2})\.(\d{4})\.mp3$/;
+                // Patrón para extraer la fecha del formato cualquier_nombre_DD.MM.YYYY.mp3
+                const pattern = /(\d{2})\.(\d{2})\.(\d{4})\.mp3$/;
                 const match = filename.match(pattern);
                 
                 if (!match) return null;
@@ -594,21 +498,98 @@
                 };
             }
             
+            // Inicializar WaveSurfer
+            function initWaveSurfer() {
+                // Limpiar instancia anterior si existe
+                if (wavesurfer) {
+                    wavesurfer.destroy();
+                }
+                
+                statusMessage.style.display = 'block';
+                statusMessage.textContent = 'Preparando visualizador...';
+                
+                // Crear nueva instancia
+                wavesurfer = WaveSurfer.create({
+                    container: '#waveform',
+                    waveColor: '#000',
+                    progressColor: '#0066cc',
+                    cursorWidth: 0,
+                    height: 60,
+                    barWidth: 2,
+                    barGap: 1,
+                    responsive: true,
+                    normalize: true,
+                    backend: 'WebAudio'
+                });
+                
+                // Eventos
+                wavesurfer.on('ready', function() {
+                    durationDisplay.textContent = formatTime(wavesurfer.getDuration());
+                    
+                    // Establecer volumen inicial
+                    const initialVolume = parseFloat(volumeSlider.value);
+                    wavesurfer.setVolume(initialVolume);
+                    updateVolumeIcon();
+                    
+                    // Ocultar loader
+                    waveformLoading.style.display = 'none';
+                    
+                    // Habilitar controles
+                    playButton.disabled = false;
+                    playButton.style.opacity = 1;
+                    playButton.style.cursor = "pointer";
+                    
+                    statusMessage.style.display = 'none';
+                });
+                
+                wavesurfer.on('audioprocess', function() {
+                    currentTimeDisplay.textContent = formatTime(wavesurfer.getCurrentTime());
+                    const percentage = (wavesurfer.getCurrentTime() / wavesurfer.getDuration()) * 100;
+                    progressBar.style.width = `${percentage}%`;
+                });
+                
+                wavesurfer.on('finish', function() {
+                    isPlaying = false;
+                    playIcon.style.display = 'block';
+                    pauseIcon.style.display = 'none';
+                });
+                
+                wavesurfer.on('loading', function(percent) {
+                    statusMessage.style.display = 'block';
+                    statusMessage.textContent = `Cargando audio: ${Math.round(percent)}%`;
+                });
+                
+                wavesurfer.on('error', function(err) {
+                    waveformLoading.style.display = 'none';
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = 'Error al cargar el audio: ' + (err || 'Archivo no encontrado');
+                    statusMessage.style.display = 'none';
+                });
+            }
+            
             // Función para buscar dinámicamente archivos de podcast disponibles
             function searchAvailablePodcasts() {
                 // Mensaje de búsqueda inicial
-                archiveList.innerHTML = '<li class="archive-item">Buscando resúmenes disponibles...</li>';
+                archiveList.innerHTML = `
+                    <li class="archive-item">
+                        <span class="archive-item-icon">
+                            <div class="loader" style="display: inline-block;"></div>
+                        </span>
+                        <span class="archive-item-date">Buscando resúmenes disponibles...</span>
+                    </li>
+                `;
+                
+                statusMessage.style.display = 'block';
+                statusMessage.textContent = 'Buscando archivos disponibles...';
                 
                 // Lista para almacenar podcasts encontrados
                 let foundPodcasts = [];
                 
-                // Lista de archivos específicos para verificar (incluyendo el que ya sabemos que existe)
+                // Lista de archivos específicos para verificar (con diferentes nombres)
                 const filesToCheck = [
-                    'reporte_semanal_16.03.2025.mp3',  // Este archivo sabemos que existe
-                    'reporte_semanal_09.03.2025.mp3',
-                    'reporte_semanal_30.03.2025.mp3',
+                    'reporte_semanal_16.03.2025.mp3',
                     'reporte_semanal_23.03.2025.mp3',
-                    'reporte_semanal_08.02.2025.mp3',
+                    'reporte_semanal_30.03.2025.mp3',
                     'reporte_1trimestre_01.04.2025.mp3'
                 ];
                 
@@ -647,6 +628,7 @@
             // Procesar la lista de podcasts encontrados
             function procesarPodcastsEncontrados(podcasts) {
                 console.log(`Podcasts encontrados: ${podcasts.length}`);
+                statusMessage.style.display = 'none';
                 
                 // Ordenar podcasts por fecha (más reciente primero)
                 podcasts.sort((a, b) => b.dateObj - a.dateObj);
@@ -661,6 +643,7 @@
                     playButton.disabled = true;
                     playButton.style.opacity = 0.5;
                     playButton.style.cursor = "not-allowed";
+                    waveformLoading.style.display = 'none';
                 } else {
                     // Actualizar la lista de archivos
                     updateArchiveList(podcasts);
@@ -670,14 +653,9 @@
                     
                     // Ocultar mensaje de error si se había mostrado
                     errorMessage.style.display = 'none';
-                    playButton.disabled = false;
-                    playButton.style.opacity = 1;
-                    playButton.style.cursor = "pointer";
                 }
             }
-
-
-
+            
             // Actualizar la lista de archivos en la interfaz
             function updateArchiveList(podcasts) {
                 archiveList.innerHTML = '';
@@ -703,14 +681,6 @@
                 return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
             }
             
-            // Actualizar la barra de progreso
-           /* function updateProgress() {
-                const percentage = (audio.currentTime / audio.duration) * 100;
-                progressBar.style.width = `${percentage}%`;
-                currentTimeDisplay.textContent = formatTime(audio.currentTime);
-            }*/
-            
-            // Cambiar entre play y pausa
             // Cambiar entre play y pausa
             function togglePlayPause() {
                 if (!wavesurfer) return;
@@ -726,56 +696,53 @@
                 }
                 isPlaying = !isPlaying;
             }
-
-
             
-            // Cargar y reproducir un podcast
             // Cargar y reproducir un podcast
             function loadPodcast(podcast) {
-    // Limpiar mensajes de error previos
-    errorMessage.style.display = 'none';
-    errorMessage.textContent = '';
-    
-    // Actualizar estado de reproducción
-    isPlaying = false;
-    playIcon.style.display = 'block';
-    pauseIcon.style.display = 'none';
-    
-    try {
-        // Crear y cargar en wavesurfer
-        initWaveSurfer();
-        wavesurfer.load(podcast.filename);
-        
-        currentPodcast = podcast.filename;
-        podcastDateDisplay.textContent = podcast.displayDate;
-        
-        // Reiniciar la barra de progreso
-        progressBar.style.width = '0%';
-        currentTimeDisplay.textContent = '00:00';
-        
-        // Esperar a que termine de cargar
-        wavesurfer.on('ready', function() {
-            // Habilitar controles
-            playButton.disabled = false;
-            playButton.style.opacity = 1;
-            playButton.style.cursor = "pointer";
-        });
-        
-        wavesurfer.on('error', function() {
-            errorMessage.style.display = 'block';
-            errorMessage.textContent = 'Archivo no encontrado o no se puede reproducir';
-        });
-        
-    } catch (error) {
-        console.error('Error al cargar podcast:', error);
-        errorMessage.style.display = 'block';
-        errorMessage.textContent = 'Error al cargar el archivo.';
-    }
-}
-
-
+                // Mostrar indicador de carga
+                waveformLoading.style.display = 'flex';
+                document.querySelector('.loader').style.display = 'block';
+                
+                // Limpiar mensajes de error previos
+                errorMessage.style.display = 'none';
+                errorMessage.textContent = '';
+                
+                // Mostrar mensaje de estado
+                statusMessage.style.display = 'block';
+                statusMessage.textContent = 'Cargando archivo de audio...';
+                
+                // Actualizar estado de reproducción
+                isPlaying = false;
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+                
+                // Desactivar botón de reproducción mientras carga
+                playButton.disabled = true;
+                playButton.style.opacity = 0.5;
+                playButton.style.cursor = "not-allowed";
+                
+                try {
+                    // Crear y cargar en wavesurfer
+                    initWaveSurfer();
+                    wavesurfer.load(podcast.filename);
+                    
+                    currentPodcast = podcast.filename;
+                    podcastDateDisplay.textContent = podcast.displayDate;
+                    
+                    // Reiniciar la barra de progreso
+                    progressBar.style.width = '0%';
+                    currentTimeDisplay.textContent = '00:00';
+                    
+                } catch (error) {
+                    console.error('Error al cargar podcast:', error);
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = 'Error al cargar el archivo.';
+                    waveformLoading.style.display = 'none';
+                    statusMessage.style.display = 'none';
+                }
+            }
             
-           // Función para actualizar el icono de volumen según el nivel
+            // Función para actualizar el icono de volumen según el nivel
             function updateVolumeIcon() {
                 if (!wavesurfer) return;
                 
@@ -800,22 +767,23 @@
                     }
                 }
             }
-                        
-          // Función para alternar entre mute y sonido
-        function toggleMute() {
-            if (!wavesurfer) return;
             
-            if (isMuted) {
-                wavesurfer.setVolume(previousVolume);
-                volumeSlider.value = previousVolume;
-            } else {
-                previousVolume = wavesurfer.getVolume();
-                wavesurfer.setVolume(0);
-                volumeSlider.value = 0;
+            // Función para alternar entre mute y sonido
+            function toggleMute() {
+                if (!wavesurfer) return;
+                
+                if (isMuted) {
+                    wavesurfer.setVolume(previousVolume);
+                    volumeSlider.value = previousVolume;
+                } else {
+                  
+                    previousVolume = wavesurfer.getVolume();
+                    wavesurfer.setVolume(0);
+                    volumeSlider.value = 0;
+                }
+                isMuted = !isMuted;
+                updateVolumeIcon();
             }
-            isMuted = !isMuted;
-            updateVolumeIcon();
-        }
             
             // Event Listeners
             playButton.addEventListener('click', togglePlayPause);
@@ -837,32 +805,18 @@
                 updateVolumeIcon();
             });
             
-            //audio.addEventListener('timeupdate', updateProgress);
-            
-            /*audio.addEventListener('ended', function() {
-                isPlaying = false;
-                playIcon.style.display = 'block';
-                pauseIcon.style.display = 'none';
-                audio.currentTime = 0;
-                updateProgress();
-             
-            });*/
-            
             progressContainer.addEventListener('click', function(e) {
+                if (!wavesurfer) return;
+                
                 const clickPosition = e.offsetX / this.offsetWidth;
-                if (wavesurfer) {
-                    wavesurfer.seekTo(clickPosition);
-                }
+                wavesurfer.seekTo(clickPosition);
             });
             
-            // Inicializar visualizador
-            initWaveSurfer();
-            
             // Inicializar reproductor
+            initWaveSurfer();
             searchAvailablePodcasts();
             updateVolumeIcon();
         });
     </script>
 </body>
 </html>
-
