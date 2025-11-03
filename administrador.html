@@ -1,0 +1,451 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrador - Dashboard Tienda Inteligente</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+  <div class="container mx-auto p-6">
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <h1 class="text-3xl font-bold text-slate-800 mb-2">Administrador de Dashboard</h1>
+      <p class="text-slate-600">Edita los datos de las gráficas del dashboard</p>
+      <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+        <h3 class="font-semibold text-green-800 mb-2">✨ Instrucciones de uso:</h3>
+        <ol class="text-sm text-green-700 space-y-1 list-decimal list-inside">
+          <li>Selecciona el <strong>Área</strong> que deseas editar</li>
+          <li>Selecciona el <strong>KPI</strong> específico</li>
+          <li>Selecciona el <strong>Período</strong> (LW/LM/LY) si aplica</li>
+          <li>Modifica los valores en los campos del editor</li>
+          <li>Haz clic en <strong>"Guardar en SharePoint"</strong></li>
+          <li>¡Listo! Los cambios se guardan automáticamente 🚀</li>
+          <li>Recarga el dashboard para ver los cambios reflejados</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Selectores -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Área</label>
+          <select id="areaSelect" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Selecciona un área</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">KPI</label>
+          <select id="kpiSelect" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+            <option value="">Selecciona un KPI</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Período</label>
+          <select id="periodoSelect" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+            <option value="">Selecciona un período</option>
+            <option value="LW">Semana (LW)</option>
+            <option value="LM">Mes (LM)</option>
+            <option value="LY">Año (LY)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Editor de datos -->
+    <div id="editorContainer" class="bg-white rounded-xl shadow-lg p-6 hidden">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-slate-800" id="editorTitle">Editor de Datos</h2>
+        <button id="saveBtn" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+          💾 Guardar Cambios
+        </button>
+      </div>
+
+      <div id="dataEditor" class="space-y-4">
+        <!-- Los campos se generarán dinámicamente aquí -->
+      </div>
+
+      <div class="mt-6 flex gap-4">
+        <button id="saveBtn2" class="px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors flex-1">
+          💾 Guardar en SharePoint
+        </button>
+        <button id="cancelBtn" class="px-8 py-3 bg-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-400 transition-colors">
+          Cancelar
+        </button>
+      </div>
+    </div>
+
+    <!-- Mensaje de éxito -->
+    <div id="successMessage" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg hidden">
+      ✅ Guardado exitosamente en SharePoint
+    </div>
+  </div>
+
+  <script>
+    let dashboardData = {};
+    let currentArea = '';
+    let currentKPI = '';
+    let currentPeriodo = '';
+
+    // Cargar datos del JSON
+    async function loadData() {
+      try {
+        const response = await fetch('dashboard_data.json');
+        dashboardData = await response.json();
+        populateAreaSelect();
+      } catch (error) {
+        console.error('Error al cargar datos:', error);
+        alert('Error al cargar los datos del dashboard');
+      }
+    }
+
+    // Poblar selector de áreas
+    function populateAreaSelect() {
+      const areaSelect = document.getElementById('areaSelect');
+      areaSelect.innerHTML = '<option value="">Selecciona un área</option>';
+      Object.keys(dashboardData).forEach(area => {
+        const option = document.createElement('option');
+        option.value = area;
+        option.textContent = area;
+        areaSelect.appendChild(option);
+      });
+    }
+
+    // Poblar selector de KPIs
+    function populateKPISelect(area) {
+      const kpiSelect = document.getElementById('kpiSelect');
+      kpiSelect.innerHTML = '<option value="">Selecciona un KPI</option>';
+      kpiSelect.disabled = false;
+      
+      // Para Avance, agregar opción especial
+      if (area === 'Avance') {
+        const option = document.createElement('option');
+        option.value = 'DatosImplementacion';
+        option.textContent = 'Datos de Implementación';
+        kpiSelect.appendChild(option);
+      } else {
+        Object.keys(dashboardData[area]).forEach(kpi => {
+          const option = document.createElement('option');
+          option.value = kpi;
+          option.textContent = kpi;
+          kpiSelect.appendChild(option);
+        });
+      }
+    }
+
+    // Generar editor de datos
+    function generateEditor() {
+      const dataEditor = document.getElementById('dataEditor');
+      dataEditor.innerHTML = '';
+      const editorTitle = document.getElementById('editorTitle');
+      
+      // Si es Avance, generar editor especial
+      if (currentArea === 'Avance') {
+        generateAvanceEditor();
+        return;
+      }
+      
+      const kpiData = dashboardData[currentArea][currentKPI];
+      const periodoData = kpiData[currentPeriodo];
+      const hasObjetivo = !kpiData.noTarget;
+
+      editorTitle.textContent = `${currentArea} > ${currentKPI} > ${currentPeriodo}`;
+
+      const numPoints = periodoData.actual.length;
+      const labels = getLabels(currentPeriodo, numPoints);
+
+      // Crear tabla
+      const table = document.createElement('div');
+      table.className = 'overflow-x-auto';
+      
+      let tableHTML = `
+        <table class="min-w-full">
+          <thead>
+            <tr class="bg-slate-100">
+              <th class="px-4 py-3 text-left font-semibold text-slate-700">Punto</th>
+              <th class="px-4 py-3 text-left font-semibold text-slate-700">Actual</th>
+              <th class="px-4 py-3 text-left font-semibold text-slate-700">Comparativo</th>
+              ${hasObjetivo ? '<th class="px-4 py-3 text-left font-semibold text-slate-700">Objetivo</th>' : ''}
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      for (let i = 0; i < numPoints; i++) {
+        tableHTML += `
+          <tr class="border-t border-slate-200 hover:bg-slate-50">
+            <td class="px-4 py-3 font-medium text-slate-700">${labels[i]}</td>
+            <td class="px-4 py-3">
+              <input type="number" step="0.1" 
+                     class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                     data-type="actual" data-index="${i}" 
+                     value="${periodoData.actual[i]}">
+            </td>
+            <td class="px-4 py-3">
+              <input type="number" step="0.1" 
+                     class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                     data-type="comparativo" data-index="${i}" 
+                     value="${periodoData.comparativo[i]}">
+            </td>
+            ${hasObjetivo ? `
+            <td class="px-4 py-3">
+              <input type="number" step="0.1" 
+                     class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                     data-type="objetivo" data-index="${i}" 
+                     value="${periodoData.objetivo}">
+            </td>
+            ` : ''}
+          </tr>
+        `;
+      }
+
+      tableHTML += `
+          </tbody>
+        </table>
+      `;
+
+      table.innerHTML = tableHTML;
+      dataEditor.appendChild(table);
+      
+      document.getElementById('editorContainer').classList.remove('hidden');
+    }
+
+    // Generar editor especial para Avance
+    function generateAvanceEditor() {
+      const editorTitle = document.getElementById('editorTitle');
+      editorTitle.textContent = 'Avance > Datos de Implementación';
+      
+      const dataEditor = document.getElementById('dataEditor');
+      const avanceData = dashboardData.Avance;
+      
+      let html = `
+        <div class="space-y-6">
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">Métricas Principales</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Total Tiendas Inteligentes</label>
+                <input type="number" id="totalTiendas" value="${avanceData.totalTiendas}" 
+                       class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Porcentaje del Total (%)</label>
+                <input type="number" id="porcentajeTotal" value="${avanceData.porcentajeTotal}" 
+                       class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">Distribución por Cadena</h3>
+            <div class="grid grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Carnemart</label>
+                <input type="number" id="distCarnemart" value="${avanceData.distribucion.Carnemart}" 
+                       class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">La Pastora</label>
+                <input type="number" id="distLaPastora" value="${avanceData.distribucion.LaPastora}" 
+                       class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Casa Hernández</label>
+                <input type="number" id="distCasaHernandez" value="${avanceData.distribucion.CasaHernandez}" 
+                       class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-purple-50 border border-purple-200 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">Evolución Anual</h3>
+            <div class="grid grid-cols-4 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">2022</label>
+                <input type="number" id="evol2022" value="${avanceData.evolucionAnual['2022']}" 
+                       class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">2023</label>
+                <input type="number" id="evol2023" value="${avanceData.evolucionAnual['2023']}" 
+                       class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">2024</label>
+                <input type="number" id="evol2024" value="${avanceData.evolucionAnual['2024']}" 
+                       class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">2025</label>
+                <input type="number" id="evol2025" value="${avanceData.evolucionAnual['2025']}" 
+                       class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      dataEditor.innerHTML = html;
+      document.getElementById('editorContainer').classList.remove('hidden');
+    }
+
+    // Obtener etiquetas según el período
+    function getLabels(periodo, numPoints) {
+      if (periodo === 'LW') {
+        return ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+      } else if (periodo === 'LM') {
+        return Array.from({length: numPoints}, (_, i) => `${i + 1}`);
+      } else {
+        return ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      }
+    }
+
+    // Guardar cambios
+    async function saveChanges() {
+      // Si es Avance, guardar de manera diferente
+      if (currentArea === 'Avance') {
+        dashboardData.Avance.totalTiendas = parseInt(document.getElementById('totalTiendas').value);
+        dashboardData.Avance.porcentajeTotal = parseInt(document.getElementById('porcentajeTotal').value);
+        dashboardData.Avance.distribucion.Carnemart = parseInt(document.getElementById('distCarnemart').value);
+        dashboardData.Avance.distribucion.LaPastora = parseInt(document.getElementById('distLaPastora').value);
+        dashboardData.Avance.distribucion.CasaHernandez = parseInt(document.getElementById('distCasaHernandez').value);
+        dashboardData.Avance.evolucionAnual['2022'] = parseInt(document.getElementById('evol2022').value);
+        dashboardData.Avance.evolucionAnual['2023'] = parseInt(document.getElementById('evol2023').value);
+        dashboardData.Avance.evolucionAnual['2024'] = parseInt(document.getElementById('evol2024').value);
+        dashboardData.Avance.evolucionAnual['2025'] = parseInt(document.getElementById('evol2025').value);
+      } else {
+        // Para otras áreas, guardar como antes
+        const inputs = document.querySelectorAll('#dataEditor input');
+        const kpiData = dashboardData[currentArea][currentKPI];
+        const periodoData = kpiData[currentPeriodo];
+
+        inputs.forEach(input => {
+          const type = input.dataset.type;
+          const index = parseInt(input.dataset.index);
+          const value = parseFloat(input.value);
+
+          if (type === 'objetivo') {
+            // El objetivo es el mismo para todos los puntos
+            periodoData.objetivo = value;
+          } else {
+            periodoData[type][index] = value;
+          }
+        });
+      }
+
+      // Guardar JSON directamente en SharePoint usando REST API
+      try {
+        // Convertir a JSON con formato
+        const jsonString = JSON.stringify(dashboardData, null, 2);
+        
+        // Obtener la URL actual del sitio
+        const siteUrl = window.location.origin + _spPageContextInfo.webServerRelativeUrl;
+        const fileUrl = siteUrl + '/dashboard_data.json';
+        
+        // Obtener el digest token para autenticación
+        const digestResponse = await fetch(siteUrl + '/_api/contextinfo', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json;odata=verbose'
+          }
+        });
+        
+        const digestData = await digestResponse.json();
+        const requestDigest = digestData.d.GetContextWebInformation.FormDigestValue;
+        
+        // Actualizar el archivo en SharePoint
+        const updateResponse = await fetch(fileUrl, {
+          method: 'PUT',
+          headers: {
+            'Accept': 'application/json;odata=verbose',
+            'Content-Type': 'application/json;odata=verbose',
+            'X-RequestDigest': requestDigest,
+            'X-HTTP-Method': 'PUT'
+          },
+          body: jsonString
+        });
+        
+        if (updateResponse.ok) {
+          // Guardar también en localStorage como respaldo
+          localStorage.setItem('dashboardData', JSON.stringify(dashboardData));
+          
+          showSuccessMessage();
+          console.log('✅ Datos guardados exitosamente en SharePoint');
+        } else {
+          throw new Error('Error al actualizar el archivo en SharePoint');
+        }
+      } catch (error) {
+        console.error('Error al guardar:', error);
+        
+        // Si falla SharePoint, descargar como backup
+        alert('⚠️ No se pudo guardar automáticamente en SharePoint.\n\nDescargando JSON para que lo subas manualmente...');
+        
+        const jsonString = JSON.stringify(dashboardData, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'dashboard_data.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        localStorage.setItem('dashboardData', JSON.stringify(dashboardData));
+      }
+    }
+
+    // Mostrar mensaje de éxito
+    function showSuccessMessage() {
+      const message = document.getElementById('successMessage');
+      message.classList.remove('hidden');
+      setTimeout(() => {
+        message.classList.add('hidden');
+      }, 3000);
+    }
+
+    // Event listeners
+    document.getElementById('areaSelect').addEventListener('change', (e) => {
+      currentArea = e.target.value;
+      if (currentArea) {
+        populateKPISelect(currentArea);
+        document.getElementById('editorContainer').classList.add('hidden');
+      }
+    });
+
+    document.getElementById('kpiSelect').addEventListener('change', (e) => {
+      currentKPI = e.target.value;
+      if (currentKPI) {
+        // Si es Avance, generar editor directamente
+        if (currentArea === 'Avance') {
+          generateEditor();
+        } else {
+          document.getElementById('periodoSelect').disabled = false;
+          document.getElementById('editorContainer').classList.add('hidden');
+        }
+      }
+    });
+
+    document.getElementById('periodoSelect').addEventListener('change', (e) => {
+      currentPeriodo = e.target.value;
+      if (currentPeriodo) {
+        generateEditor();
+      }
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', saveChanges);
+    document.getElementById('saveBtn2').addEventListener('click', saveChanges);
+    
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+      if (confirm('¿Descartar los cambios?')) {
+        document.getElementById('editorContainer').classList.add('hidden');
+        loadData();
+      }
+    });
+
+    // Cargar datos al iniciar
+    loadData();
+  </script>
+</body>
+</html>
+

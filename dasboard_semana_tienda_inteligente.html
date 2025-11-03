@@ -1,0 +1,1031 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tienda Inteligente - Dashboard</title>
+  <!-- Tailwind CSS desde CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js desde CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="min-h-screen bg-slate-50">
+  <!-- Mobile Menu Button -->
+  <div class="md:hidden fixed top-4 left-4 z-50">
+    <button id="mobileMenuBtn" class="bg-white p-2 rounded-lg shadow-lg border border-gray-200">
+      <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Menu Overlay -->
+  <div id="mobileMenuOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
+
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 h-screen fixed md:sticky top-0 z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-xl md:shadow-sm overflow-y-auto py-4" style="background-color: #244170;">
+      <!-- Close button for mobile -->
+      <div class="flex justify-end mb-4 md:hidden p-4">
+        <button id="closeSidebarBtn" class="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="text-center mb-6 px-4">
+        <div class="flex justify-center mb-2">
+          <img src="images/4.png" alt="Logo" class="h-12 w-auto object-contain">
+        </div>
+        <div class="text-white font-semibold text-lg">Tienda Inteligente</div>
+      </div>
+      <nav class="space-y-2 text-white px-4">
+        <section>
+          <ul id="implementacionList" class="space-y-2 mb-6">
+            <li data-area="Avance" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white hover:bg-opacity-20 cursor-pointer bg-white bg-opacity-20 font-medium text-white">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+              <span>Avance</span>
+            </li>
+          </ul>
+        </section>
+        <section>
+          <ul id="areasList" class="space-y-2">
+            <li data-area="Operaciones" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white hover:bg-opacity-20 cursor-pointer text-white">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <span>Operaciones</span>
+            </li>
+            <li data-area="Mercaderías" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white hover:bg-opacity-20 cursor-pointer text-white">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+              </svg>
+              <span>Mercaderías</span>
+            </li>
+            <li data-area="Seguridad" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white hover:bg-opacity-20 cursor-pointer text-white">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+              </svg>
+              <span>Seguridad</span>
+            </li>
+            <li data-area="Administración" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white hover:bg-opacity-20 cursor-pointer text-white">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+              <span>Administración</span>
+            </li>
+            <li data-area="Mantenimiento" class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white hover:bg-opacity-20 cursor-pointer text-white">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path>
+              </svg>
+              <span>Mantenimiento</span>
+            </li>
+          </ul>
+        </section>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 md:p-6 pt-16 md:pt-6 overflow-y-auto">
+      <!-- Top bar -->
+      <div class="mb-6 flex items-center gap-3">
+        <div class="bg-blue-50 border border-blue-200 rounded-xl px-4 py-2">
+          <span class="text-blue-800 font-semibold text-base">Periodo hasta el 5 de Octubre del 2025</span>
+        </div>
+      </div>
+
+      <!-- AVANCE (IMPLEMENTACIÓN) - VISIBLE POR DEFECTO -->
+      <section id="area-Avance" class="block space-y-6">
+        <!-- Header limpio -->
+        <div class="mb-8">
+          <h2 class="text-3xl font-bold text-slate-800 mb-2">Estatus de Implementación</h2>
+          <p class="text-slate-600">Resumen general del progreso de tiendas inteligentes</p>
+        </div>
+
+        <!-- Métricas principales -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white border border-slate-200 p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+              </div>
+            </div>
+            <div id="totalTiendas" class="text-5xl font-bold text-slate-800 mb-2">349</div>
+            <div class="text-lg text-slate-600 font-medium">Tiendas Inteligentes</div>
+            <div class="text-sm text-slate-500 mt-2">Total implementadas</div>
+          </div>
+          <div class="bg-white border border-slate-200 p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-emerald-50 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+              </div>
+            </div>
+            <div id="porcentajeTotal" class="text-5xl font-bold text-slate-800 mb-2">92%</div>
+            <div class="text-lg text-slate-600 font-medium">Del Total de Tiendas</div>
+            <div class="text-sm text-slate-500 mt-2">Cobertura actual</div>
+          </div>
+        </div>
+
+        <!-- Distribución por cadena -->
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+          <h3 class="text-xl font-semibold text-slate-800 mb-6">Distribución por Cadena</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="text-center">
+              <div class="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                <img src="images/3.png" alt="Carnemart Logo" class="w-full h-full object-contain">
+              </div>
+              <div id="distCarnemart" class="text-3xl font-bold text-slate-800 mb-2">268</div>
+              <div class="text-lg font-medium text-slate-700 mb-1">Carnemart</div>
+              <div class="text-sm text-slate-500"><span id="pctCarnemart">76.8</span>% del total</div>
+            </div>
+            <div class="text-center">
+              <div class="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                <img src="images/2.png" alt="La Pastora Logo" class="w-full h-full object-contain">
+              </div>
+              <div id="distLaPastora" class="text-3xl font-bold text-slate-800 mb-2">62</div>
+              <div class="text-lg font-medium text-slate-700 mb-1">La Pastora</div>
+              <div class="text-sm text-slate-500"><span id="pctLaPastora">17.8</span>% del total</div>
+            </div>
+            <div class="text-center">
+              <div class="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                <img src="images/1.png" alt="Casa Hernández Logo" class="w-full h-full object-contain">
+              </div>
+              <div id="distCasaHernandez" class="text-3xl font-bold text-slate-800 mb-2">19</div>
+              <div class="text-lg font-medium text-slate-700 mb-1">Casa Hernández</div>
+              <div class="text-sm text-slate-500"><span id="pctCasaHernandez">5.4</span>% del total</div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Resumen de progreso -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <h3 class="text-xl font-semibold text-slate-800 mb-6">Evolución Anual</h3>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="relative group">
+              <div class="text-center p-6 border border-slate-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-slate-300">
+                <div class="text-sm font-medium text-slate-600 mb-2">2022</div>
+                <div id="evol2022" class="text-3xl font-bold text-slate-800 mb-2">50</div>
+                <div class="text-sm text-slate-500">Nuevas tiendas</div>
+              </div>
+            </div>
+            <div class="relative group">
+              <div class="text-center p-6 border border-slate-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-slate-300">
+                <div class="text-sm font-medium text-slate-600 mb-2">2023</div>
+                <div id="evol2023" class="text-3xl font-bold text-slate-800 mb-2">100</div>
+                <div class="text-sm text-slate-500">Nuevas tiendas</div>
+              </div>
+            </div>
+            <div class="relative group">
+              <div class="text-center p-6 border border-slate-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-slate-300">
+                <div class="text-sm font-medium text-slate-600 mb-2">2024</div>
+                <div id="evol2024" class="text-3xl font-bold text-slate-800 mb-2">105</div>
+                <div class="text-sm text-slate-500">Nuevas tiendas</div>
+              </div>
+            </div>
+            <div class="relative group">
+              <div class="text-center p-6 border border-slate-200 rounded-lg hover:shadow-md transition-all duration-200 hover:border-slate-300">
+                <div class="text-sm font-medium text-slate-600 mb-2">2025</div>
+                <div id="evol2025" class="text-3xl font-bold text-slate-800 mb-2">94</div>
+                <div class="text-sm text-slate-500">Nuevas tiendas</div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-6 pt-4 border-t border-slate-200">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-slate-600">Total acumulado:</span>
+              <span id="totalAcumulado" class="font-semibold text-slate-800">349 tiendas</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- OPERACIONES -->
+      <section id="area-Operaciones" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Índice de Disponibilidad Operativa (Sin Huecos) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Índice de Disponibilidad Operativa (Sin Huecos)" data-type="percent" data-target="95" data-lower-better="false">
+          <div class="flex items-center justify-between">
+            <h3 class="text-slate-700 font-semibold text-lg">Índice de Disponibilidad Operativa (Sin Huecos)</h3>
+            <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+              <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+              <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+              <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+            </div>
+          </div>
+          <div class="kpi-text">
+            <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+            <div class="badges mt-2 flex flex-wrap gap-2"></div>
+          </div>
+          <div class="h-48">
+            <canvas class="kpi-chart w-full h-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Duración de Huecos -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Duración de Huecos" data-type="time" data-target="60" data-lower-better="true">
+          <div class="flex items-center justify-between">
+            <h3 class="text-slate-700 font-semibold text-lg">Duración de Huecos</h3>
+            <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+              <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+              <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+              <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+            </div>
+          </div>
+          <div class="kpi-text">
+            <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+            <div class="badges mt-2 flex flex-wrap gap-2"></div>
+          </div>
+          <div class="h-48">
+            <canvas class="kpi-chart w-full h-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Oportunidad Generada -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Oportunidad Generada" data-type="currency" data-no-target="true">
+          <div class="flex items-center justify-between">
+            <h3 class="text-slate-700 font-semibold text-lg">Oportunidad Generada</h3>
+            <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+              <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+              <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+              <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+            </div>
+          </div>
+          <div class="kpi-text">
+            <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+            <div class="badges mt-2 flex flex-wrap gap-2"></div>
+          </div>
+          <div class="h-48">
+            <canvas class="kpi-chart w-full h-full"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- MERCADERÍAS -->
+      <section id="area-Mercaderías" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Auditorías realizadas" data-type="count" data-target="200" data-monthly="200" data-lower-better="false">
+          <div class="flex items-center justify-between">
+            <h3 class="text-slate-700 font-semibold text-lg">Auditorías realizadas</h3>
+            <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+              <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+              <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+              <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+            </div>
+          </div>
+          <div class="kpi-text">
+            <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+            <div class="badges mt-2 flex flex-wrap gap-2"></div>
+          </div>
+          <div class="h-48">
+            <canvas class="kpi-chart w-full h-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Promedio Calificación de Auditorías -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Promedio Calificación de Auditorías" data-type="score" data-target="90" data-lower-better="false">
+          <div class="flex items-center justify-between">
+            <h3 class="text-slate-700 font-semibold text-lg">Promedio Calificación de Auditorías</h3>
+            <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+              <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+              <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+              <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+            </div>
+          </div>
+          <div class="kpi-text">
+            <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+            <div class="badges mt-2 flex flex-wrap gap-2"></div>
+          </div>
+          <div class="h-48">
+            <canvas class="kpi-chart w-full h-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Oportunidad Generada -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Oportunidad Generada" data-type="currency" data-no-target="true">
+          <div class="flex items-center justify-between">
+            <h3 class="text-slate-700 font-semibold text-lg">Oportunidad Generada</h3>
+            <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+              <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+              <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+              <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+            </div>
+          </div>
+          <div class="kpi-text">
+            <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+            <div class="badges mt-2 flex flex-wrap gap-2"></div>
+          </div>
+          <div class="h-48">
+            <canvas class="kpi-chart w-full h-full"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEGURIDAD -->
+      <section id="area-Seguridad" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Tiendas no armadas -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Tiendas no armadas" data-type="count" data-target="0" data-lower-better="true">
+          <div class="flex items-center justify-between">
+            <h3 class="text-slate-700 font-semibold text-lg">Tiendas no armadas</h3>
+            <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+              <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+              <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+              <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+            </div>
+          </div>
+          <div class="kpi-text">
+            <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+            <div class="badges mt-2 flex flex-wrap gap-2"></div>
+          </div>
+          <div class="h-48">
+            <canvas class="kpi-chart w-full h-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Alertas de retraso de cierre -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Alertas de retraso de cierre" data-type="count" data-target="0" data-lower-better="true">
+          <div class="flex items-center justify-between">
+            <h3 class="text-slate-700 font-semibold text-lg">Alertas de retraso de cierre</h3>
+            <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+              <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+              <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+              <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+            </div>
+          </div>
+          <div class="kpi-text">
+            <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+            <div class="badges mt-2 flex flex-wrap gap-2"></div>
+          </div>
+          <div class="h-48">
+            <canvas class="kpi-chart w-full h-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Alertas de retraso de apertura -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Alertas de retraso de apertura" data-type="count" data-target="0" data-lower-better="true">
+          <div class="flex items-center justify-between">
+            <h3 class="text-slate-700 font-semibold text-lg">Alertas de retraso de apertura</h3>
+            <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+              <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+              <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+              <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+            </div>
+          </div>
+          <div class="kpi-text">
+            <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+            <div class="badges mt-2 flex flex-wrap gap-2"></div>
+          </div>
+          <div class="h-48">
+            <canvas class="kpi-chart w-full h-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Alertas de movimiento fuera de horario -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Alertas de movimiento fuera de horario" data-type="count" data-target="0" data-lower-better="true">
+          <div class="flex items-center justify-between">
+            <h3 class="text-slate-700 font-semibold text-lg">Alertas de movimiento fuera de horario</h3>
+            <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+              <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+              <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+              <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+            </div>
+          </div>
+          <div class="kpi-text">
+            <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+            <div class="badges mt-2 flex flex-wrap gap-2"></div>
+          </div>
+          <div class="h-48">
+            <canvas class="kpi-chart w-full h-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Oportunidad Generada -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Oportunidad Generada" data-type="currency" data-no-target="true">
+          <div class="flex items-center justify-between">
+            <h3 class="text-slate-700 font-semibold text-lg">Oportunidad Generada</h3>
+            <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+              <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+              <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+              <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+            </div>
+          </div>
+          <div class="kpi-text">
+            <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+            <div class="badges mt-2 flex flex-wrap gap-2"></div>
+          </div>
+          <div class="h-48">
+            <canvas class="kpi-chart w-full h-full"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADMINISTRACIÓN -->
+      <section id="area-Administración" class="hidden space-y-6">
+        <!-- KPIs de Administración -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Alertas por incidencia por cancelación -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Alertas por incidencia por cancelación" data-type="percent" data-target="50" data-lower-better="false">
+            <div class="flex items-center justify-between">
+              <h3 class="text-slate-700 font-semibold text-lg">Alertas por incidencia por cancelación</h3>
+              <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+                <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+                <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+                <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+              </div>
+            </div>
+            <div class="kpi-text">
+              <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+              <div class="badges mt-2 flex flex-wrap gap-2"></div>
+            </div>
+            <div class="h-48">
+              <canvas class="kpi-chart w-full h-full"></canvas>
+            </div>
+          </div>
+
+          <!-- Alertas por incidencia por devolución -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Alertas por incidencia por devolución" data-type="percent" data-target="50" data-lower-better="false">
+            <div class="flex items-center justify-between">
+              <h3 class="text-slate-700 font-semibold text-lg">Alertas por incidencia por devolución</h3>
+              <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+                <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+                <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+                <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+              </div>
+            </div>
+            <div class="kpi-text">
+              <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+              <div class="badges mt-2 flex flex-wrap gap-2"></div>
+            </div>
+            <div class="h-48">
+              <canvas class="kpi-chart w-full h-full"></canvas>
+            </div>
+          </div>
+
+          <!-- Alertas por venta por importe alto -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Alertas por venta por importe alto" data-type="percent" data-target="50" data-lower-better="false">
+            <div class="flex items-center justify-between">
+              <h3 class="text-slate-700 font-semibold text-lg">Alertas por venta por importe alto</h3>
+              <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+                <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+                <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+                <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+              </div>
+            </div>
+            <div class="kpi-text">
+              <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+              <div class="badges mt-2 flex flex-wrap gap-2"></div>
+            </div>
+            <div class="h-48">
+              <canvas class="kpi-chart w-full h-full"></canvas>
+            </div>
+          </div>
+
+          <!-- Oportunidad Generada -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Oportunidad Generada" data-type="currency" data-no-target="true">
+            <div class="flex items-center justify-between">
+              <h3 class="text-slate-700 font-semibold text-lg">Oportunidad Generada</h3>
+              <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+                <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+                <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+                <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+              </div>
+            </div>
+            <div class="kpi-text">
+              <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+              <div class="badges mt-2 flex flex-wrap gap-2"></div>
+            </div>
+            <div class="h-48">
+              <canvas class="kpi-chart w-full h-full"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MANTENIMIENTO -->
+      <section id="area-Mantenimiento" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Atención de Temperaturas Fuera de Rango -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Atención de Temperaturas Fuera de Rango" data-type="percent" data-target="90" data-lower-better="false">
+          <div class="flex items-center justify-between">
+            <h3 class="text-slate-700 font-semibold text-lg">Atención de Temperaturas Fuera de Rango</h3>
+            <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+              <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+              <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+              <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+            </div>
+          </div>
+          <div class="kpi-text">
+            <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+            <div class="badges mt-2 flex flex-wrap gap-2"></div>
+          </div>
+          <div class="h-48">
+            <canvas class="kpi-chart w-full h-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Atención de Puertas Abiertas -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Atención de Puertas Abiertas" data-type="percent" data-target="90" data-lower-better="false">
+          <div class="flex items-center justify-between">
+            <h3 class="text-slate-700 font-semibold text-lg">Atención de Puertas Abiertas</h3>
+            <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+              <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+              <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+              <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+            </div>
+          </div>
+          <div class="kpi-text">
+            <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+            <div class="badges mt-2 flex flex-wrap gap-2"></div>
+          </div>
+          <div class="h-48">
+            <canvas class="kpi-chart w-full h-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Oportunidad Generada -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4 kpi-block" data-title="Oportunidad Generada" data-type="currency" data-no-target="true">
+          <div class="flex items-center justify-between">
+            <h3 class="text-slate-700 font-semibold text-lg">Oportunidad Generada</h3>
+            <div class="tabs flex gap-1 bg-slate-100 rounded-xl p-1 text-sm">
+              <button data-tab="LW" class="px-3 py-1 rounded-lg bg-white shadow text-slate-800 font-medium">LW</button>
+              <button data-tab="LM" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LM</button>
+              <button data-tab="LY" class="px-3 py-1 rounded-lg text-slate-500 hover:text-slate-700">LY</button>
+            </div>
+          </div>
+          <div class="kpi-text">
+            <div class="kpi-value text-4xl font-bold text-slate-700">--</div>
+            <div class="badges mt-2 flex flex-wrap gap-2"></div>
+          </div>
+          <div class="h-48">
+            <canvas class="kpi-chart w-full h-full"></canvas>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Esperar a que Tailwind y Chart.js carguen
+    window.addEventListener('DOMContentLoaded', async function() {
+      // Cargar datos desde JSON
+      let dashboardData = {};
+      try {
+        const response = await fetch('dashboard_data.json');
+        dashboardData = await response.json();
+      } catch (error) {
+        console.error('Error al cargar dashboard_data.json:', error);
+        alert('Error al cargar los datos del dashboard');
+        return;
+      }
+
+      // Función para obtener datos desde el JSON
+      function getDataFromJSON(area, kpiName, period) {
+        try {
+          const areaData = dashboardData[area];
+          if (!areaData) return null;
+          
+          const kpiData = areaData[kpiName];
+          if (!kpiData) return null;
+          
+          const periodData = kpiData[period];
+          if (!periodData) return null;
+          
+          return {
+            actual: periodData.actual,
+            comparativo: periodData.comparativo,
+            objetivo: periodData.objetivo,
+            type: kpiData.type,
+            noTarget: kpiData.noTarget,
+            target: kpiData.target,
+            lowerBetter: kpiData.lowerBetter
+          };
+        } catch (error) {
+          console.error('Error al obtener datos del JSON:', error);
+          return null;
+        }
+      }
+
+      function makeDataset({ period = 'LW', kpiTitle, area }) {
+        const pts = period === 'LW' ? 7 : period === 'LM' ? 30 : 12;
+        
+        // Obtener datos del JSON
+        const jsonData = getDataFromJSON(area, kpiTitle, period);
+        
+        if (!jsonData) {
+          console.error(`No se encontraron datos para ${area} > ${kpiTitle} > ${period}`);
+          return null;
+        }
+
+        const actual = jsonData.actual;
+        const prev = jsonData.comparativo;
+        const effectiveTarget = jsonData.objetivo || 0;
+
+        const week = ['L','M','X','J','V','S','D'];
+        const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+        const labels = period === 'LW' ? week.slice(0, pts) : period === 'LM' ? Array.from({length: pts}, (_, i) => `${i+1}`) : months.slice(0, pts);
+
+        const data = labels.map((x,i) => ({ x, actual: actual[i], prev: prev[i], target: effectiveTarget }));
+        const current = actual[actual.length - 1];
+        const previous = prev[prev.length - 1];
+        return { data, current, previous, target: effectiveTarget };
+      }
+
+      function evaluateStatus(current, target, isLowerBetter) {
+        const achieved = isLowerBetter ? current <= target : current >= target;
+        const margin = isLowerBetter ? (current - target) / target : (target - current) / target;
+        const isYellow = !achieved && margin <= 0.10 && margin >= 0;
+        const colorCls = achieved ? 'text-emerald-600' : isYellow ? 'text-amber-600' : 'text-rose-600';
+        return { achieved, isYellow, colorCls };
+      }
+
+      function computeEffectiveTarget({ type, tab, target, monthlyTarget }) {
+        if (type === 'count' && (monthlyTarget || target)) {
+          const mTarget = monthlyTarget ?? target;
+          const now = new Date();
+          const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+          if (tab === 'LY') return mTarget;
+          if (tab === 'LM') return mTarget / daysInMonth;
+          if (tab === 'LW') return mTarget / (daysInMonth / 7);
+        }
+        return target;
+      }
+
+      function fmtValue(v, type) {
+        if (type === 'percent') return `${v.toFixed(0)}%`;
+        if (type === 'time') return `${v.toFixed(0)} min`;
+        if (type === 'score') return `${v.toFixed(0)}`;
+        if (type === 'currency') {
+          // Formatear como moneda en pesos mexicanos
+          if (v >= 1000) {
+            // Millones
+            return `$${(v/1000).toFixed(1)} mill`;
+          } else if (v >= 100) {
+            // Cientos de miles
+            return `$${v.toFixed(0)}k`;
+          } else {
+            // Miles
+            return `$${v.toFixed(1)}k`;
+          }
+        }
+        if (type === 'count' && v > 1000) {
+          // Para números grandes, mostrar en miles
+          return `${(v/1000).toFixed(1)}k`;
+        }
+        return `${v.toFixed(0)}`;
+      }
+
+      function fmtDeltaPct(v) {
+        const s = (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+        return s;
+      }
+
+
+      // Render KPI Block
+      function renderKPIBlock(blockEl, tab) {
+        const type = blockEl.dataset.type;
+        const target = Number(blockEl.dataset.target);
+        const lowerBetter = blockEl.dataset.lowerBetter === 'true';
+        const monthlyTarget = blockEl.dataset.monthly ? Number(blockEl.dataset.monthly) : undefined;
+        const useAverage = blockEl.dataset.useAverage === 'true';
+        const noTarget = blockEl.dataset.noTarget === 'true';
+        const kpiTitle = blockEl.dataset.title;
+        
+        // Obtener área actual del estado
+        const area = state.selectedArea;
+        
+        // Mapear nombres de área si es necesario
+        const areaMapping = {
+          'Avance': 'Implementación'
+        };
+        const mappedArea = areaMapping[area] || area;
+
+        const effectiveTarget = computeEffectiveTarget({ type, tab, target, monthlyTarget });
+        const datasetResult = makeDataset({ 
+          period: tab, 
+          kpiTitle: kpiTitle,
+          area: mappedArea
+        });
+        
+        if (!datasetResult) {
+          console.error(`No se pudieron cargar datos para ${kpiTitle}`);
+          return;
+        }
+        
+        const { data, current, previous, target: finalTarget } = datasetResult;
+
+        // KPI textual
+        const deltaVsPrev = current - previous;
+        const deltaPct = previous === 0 ? 0 : (deltaVsPrev / previous) * 100;
+        
+        const kpiValueEl = blockEl.querySelector('.kpi-value');
+        kpiValueEl.textContent = fmtValue(current, type);
+        
+        // Si no hay objetivo, usar color neutral
+        if (noTarget) {
+          kpiValueEl.className = `kpi-value text-4xl font-bold text-slate-700`;
+        } else {
+          const { achieved, isYellow, colorCls } = evaluateStatus(current, finalTarget, lowerBetter);
+          kpiValueEl.className = `kpi-value text-4xl font-bold ${colorCls}`;
+        }
+
+        const badgesEl = blockEl.querySelector('.badges');
+        badgesEl.innerHTML = '';
+        
+        const badge = (html, good) => {
+          const span = document.createElement('span');
+          span.className = `px-2 py-1 rounded-full text-xs font-medium ${
+            good === undefined ? 'bg-slate-100 text-slate-700' : 
+            good ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+          }`;
+          span.innerHTML = html;
+          return span;
+        };
+        
+        // Solo mostrar badges de objetivo si no es noTarget
+        if (!noTarget) {
+          // Cambiar texto del objetivo si usa promedio
+          const targetLabel = useAverage ? 'Promedio' : 'Objetivo';
+          badgesEl.appendChild(badge(`${targetLabel}: <b>${fmtValue(finalTarget, type)}</b>`));
+          
+          const gapToTargetRaw = current - finalTarget;
+          const gapGood = lowerBetter ? gapToTargetRaw <= 0 : gapToTargetRaw >= 0;
+          const gapTxt = `Gap vs ${targetLabel.toLowerCase()}: ${(gapToTargetRaw>0?'+':'')}${
+            type==='percent' ? gapToTargetRaw.toFixed(1) : 
+            type==='currency' || (type==='count' && finalTarget > 1000) ? 
+              (gapToTargetRaw/1000).toFixed(1) + 'k' : 
+            gapToTargetRaw.toFixed(0)
+          }${type==='percent'?'%':(type==='time'?' min':'')}`;
+          badgesEl.appendChild(badge(gapTxt, gapGood));
+        }
+        
+        // Badge de comparación vs período anterior (siempre se muestra)
+        const deltaGood = noTarget ? undefined : (lowerBetter ? deltaVsPrev < 0 : deltaVsPrev > 0);
+        badgesEl.appendChild(badge(`${fmtDeltaPct(deltaPct)} vs período anterior`, deltaGood));
+
+        // Chart.js
+        const canvas = blockEl.querySelector('canvas.kpi-chart');
+        if (canvas._chart) {
+          canvas._chart.destroy();
+        }
+        const ctx = canvas.getContext('2d');
+
+        const labels = data.map(d => d.x);
+        const actual = data.map(d => d.actual);
+        const previousArr = data.map(d => d.prev);
+        const targetArr = data.map(() => finalTarget);
+
+        // Construir datasets según si hay objetivo o no
+        const datasets = [];
+        
+        // Solo agregar línea de objetivo si no es noTarget
+        if (!noTarget) {
+          const targetLabel = useAverage ? 'Promedio' : 'Objetivo';
+          datasets.push({
+            label: targetLabel,
+            data: targetArr,
+            borderColor: '#ef4444',
+            borderDash: [6,6],
+            borderWidth: 2,
+            pointRadius: 0,
+            fill: false
+          });
+        }
+        
+        // Línea comparativo (siempre)
+        datasets.push({
+          label: 'Comparativo',
+          data: previousArr,
+          borderColor: '#94a3b8',
+          borderDash: [6,6],
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: false
+        });
+        
+        // Línea actual (siempre)
+        datasets.push({
+          label: 'Actual',
+          data: actual,
+          borderColor: '#3b82f6',
+          borderWidth: 3,
+          pointRadius: 0,
+          fill: false
+        });
+
+        // Calcular rango dinámico del eje Y para mejor visualización
+        const allValues = [...actual, ...previousArr];
+        if (!noTarget) allValues.push(...targetArr);
+        const minVal = Math.min(...allValues);
+        const maxVal = Math.max(...allValues);
+        const range = maxVal - minVal;
+        const margin = range * 0.15; // 15% de margen arriba y abajo
+        
+        // Configurar el eje Y según el tipo
+        const yAxisConfig = {
+          ticks: {
+            color: '#94a3b8',
+            callback: function(value) {
+              return fmtValue(value, type);
+            }
+          }
+        };
+        
+        // Para currency, nunca comenzar en cero
+        // Para otros tipos, solo comenzar en cero si el valor mínimo está cerca de cero
+        if (type === 'currency' || minVal > range * 0.3) {
+          // Usar rango dinámico con márgenes
+          yAxisConfig.suggestedMin = Math.max(0, minVal - margin);
+          yAxisConfig.suggestedMax = maxVal + margin;
+        } else {
+          // Comenzar en cero si los valores están cerca de cero
+          yAxisConfig.beginAtZero = true;
+        }
+
+        canvas._chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: datasets
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: yAxisConfig,
+              x: {
+                ticks: {
+                  color: '#94a3b8'
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  boxWidth: 12,
+                  font: {
+                    size: 12
+                  }
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => `${ctx.dataset.label}: ${fmtValue(ctx.parsed.y, type)}`
+                }
+              }
+            },
+            elements: {
+              line: {
+                tension: 0.35
+              }
+            }
+          }
+        });
+      }
+
+      // Estado
+      const state = { selectedArea: 'Avance' }; // Cambiado para que Avance sea el default
+
+      function setActiveArea(area) {
+        state.selectedArea = area;
+        // actualizar sidebar - tanto implementación como áreas
+        document.querySelectorAll('#implementacionList li, #areasList li').forEach(li => {
+          const active = li.dataset.area === area;
+          li.classList.toggle('bg-white', active);
+          li.classList.toggle('bg-opacity-20', active);
+          li.classList.toggle('font-medium', active);
+        });
+        // mostrar/ocultar secciones
+        ['Avance','Operaciones','Mercaderías','Seguridad','Administración','Mantenimiento'].forEach(a => {
+          const sec = document.getElementById(`area-${a}`);
+          if (!sec) return;
+          if (a === area) {
+            sec.classList.remove('hidden');
+          } else {
+            sec.classList.add('hidden');
+          }
+        });
+        
+        // render de bloques del área visible (si los hay)
+        if (area !== 'Avance') {
+          document.querySelectorAll(`#area-${area} .kpi-block`).forEach(block => {
+            renderKPIBlock(block, 'LW');
+          });
+        }
+      }
+
+      function attachTabHandlers() {
+        document.querySelectorAll('.kpi-block').forEach(block => {
+          const tabs = block.querySelectorAll('.tabs button');
+          tabs.forEach(btn => {
+            btn.addEventListener('click', () => {
+              tabs.forEach(b => {
+                b.classList.remove('bg-white','shadow','text-slate-800','font-medium');
+                b.classList.add('text-slate-500');
+              });
+              btn.classList.add('bg-white','shadow','text-slate-800','font-medium');
+              btn.classList.remove('text-slate-500');
+              const tab = btn.dataset.tab;
+              renderKPIBlock(block, tab);
+            });
+          });
+        });
+      }
+
+      // Event handlers del sidebar
+      document.querySelectorAll('#implementacionList li, #areasList li').forEach(li => {
+        li.addEventListener('click', () => {
+          setActiveArea(li.dataset.area);
+          // Cerrar menú móvil al seleccionar un área
+          closeMobileMenu();
+        });
+      });
+
+      // Mobile menu handlers
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+      const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+      const sidebar = document.getElementById('sidebar');
+
+      function openMobileMenu() {
+        sidebar.classList.remove('-translate-x-full');
+        mobileMenuOverlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeMobileMenu() {
+        sidebar.classList.add('-translate-x-full');
+        mobileMenuOverlay.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+
+      // Abrir menú móvil
+      if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+      }
+
+      // Cerrar menú móvil con botón X
+      if (closeSidebarBtn) {
+        closeSidebarBtn.addEventListener('click', closeMobileMenu);
+      }
+
+      // Cerrar menú móvil al hacer clic en el overlay
+      if (mobileMenuOverlay) {
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+      }
+
+      // Cerrar menú móvil al cambiar tamaño de ventana a desktop
+      window.addEventListener('resize', () => {
+        if (window.innerWidth >= 768) {
+          closeMobileMenu();
+        }
+      });
+
+      // Cargar datos de Avance
+      function loadAvanceData() {
+        if (!dashboardData.Avance) {
+          console.error('No se encontraron datos de Avance');
+          return;
+        }
+        
+        const avance = dashboardData.Avance;
+        
+        // Métricas principales
+        document.getElementById('totalTiendas').textContent = avance.totalTiendas;
+        document.getElementById('porcentajeTotal').textContent = `${avance.porcentajeTotal}%`;
+        
+        // Distribución por cadena
+        document.getElementById('distCarnemart').textContent = avance.distribucion.Carnemart;
+        document.getElementById('distLaPastora').textContent = avance.distribucion.LaPastora;
+        document.getElementById('distCasaHernandez').textContent = avance.distribucion.CasaHernandez;
+        
+        // Calcular porcentajes
+        const total = avance.totalTiendas;
+        document.getElementById('pctCarnemart').textContent = ((avance.distribucion.Carnemart / total) * 100).toFixed(1);
+        document.getElementById('pctLaPastora').textContent = ((avance.distribucion.LaPastora / total) * 100).toFixed(1);
+        document.getElementById('pctCasaHernandez').textContent = ((avance.distribucion.CasaHernandez / total) * 100).toFixed(1);
+        
+        // Evolución anual
+        document.getElementById('evol2022').textContent = avance.evolucionAnual['2022'];
+        document.getElementById('evol2023').textContent = avance.evolucionAnual['2023'];
+        document.getElementById('evol2024').textContent = avance.evolucionAnual['2024'];
+        document.getElementById('evol2025').textContent = avance.evolucionAnual['2025'];
+        
+        // Total acumulado (suma de todos los años)
+        const totalAcum = avance.evolucionAnual['2022'] + avance.evolucionAnual['2023'] + avance.evolucionAnual['2024'] + avance.evolucionAnual['2025'];
+        document.getElementById('totalAcumulado').textContent = `${totalAcum} tiendas`;
+      }
+
+      // Inicialización
+      loadAvanceData();
+      attachTabHandlers();
+      setActiveArea('Avance'); // Avance es ahora la página inicial
+      
+    });
+  </script>
+</body>
+</html>
